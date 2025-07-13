@@ -1,45 +1,53 @@
-import { Hono } from "hono";
-import { cors } from "hono/cors";
-import { Env } from "./env";
+import { Context, Hono } from 'hono';
+import { cors } from 'hono/cors';
+import { Env } from './env';
+import { vValidator } from '@hono/valibot-validator';
+import { createCalendarEventSchema } from './schemas/calendarEvent';
 
-const apiApp = new Hono<{ Bindings: Env }>();
+const apiApp = new Hono<{ Bindings: Env }>()
+  .get('/events', async (c) => {
+    const sql = getSqlFromContext(c);
+    return c.json(await sql.getCalendarEvents());
+  })
+  .post('/events', vValidator('json', createCalendarEventSchema), async (c) => {
+    const sql = getSqlFromContext(c);
+    const data = c.req.valid('json');
+
+    return c.json(await sql.createCalendarEvents(data));
+  });
 
 const app = new Hono<{ Bindings: Env }>()
   .use(
-    "*",
+    '*',
     cors({
-      origin: [
-        "http://localhost:5173",
-      ],
-      allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    })
+      origin: ['http://localhost:5173'],
+      allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    }),
   )
-  .route("/api", apiApp)
-  .get("*", HandleAssets);
+  .route('/api', apiApp)
+  .get('*', async (c) => {
+    try {
+      const assetResponse = await c.env.ASSETS.fetch(c.req.url);
+
+      if (assetResponse.status !== 404) {
+        return assetResponse;
+      }
+
+      const indexResponse = await c.env.ASSETS.fetch(new URL('/', c.req.url));
+      return c.html(await indexResponse.text());
+    } catch (error) {
+      const indexResponse = await c.env.ASSETS.fetch(new URL('/', c.req.url));
+      return c.html(await indexResponse.text());
+    }
+  });
 
 export default app;
 
 export type AppType = typeof app;
 
+export { SqlServer } from './env';
 
-// To host the react app
-export async function HandleAssets(c) {
-  try {
-    // Try to serve the requested asset first
-    const assetResponse = await c.env.ASSETS.fetch(c.req.url);
-
-    // If the asset exists and is not a 404, return it
-    if (assetResponse.status !== 404) {
-      return assetResponse;
-    }
-
-    // If asset doesn't exist, serve index.html for client-side routing
-    const indexResponse = await c.env.ASSETS.fetch(new URL('/', c.req.url));
-    return c.html(await indexResponse.text());
-  } catch (error) {
-    // Fallback to serving index.html if anything goes wrong
-    const indexResponse = await c.env.ASSETS.fetch(new URL('/', c.req.url));
-    return c.html(await indexResponse.text());
-  }
+function getSqlFromContext(c: Context<{ Bindings: Env }>) {
+  const id = c.env.SQL_SERVER.idFromName('default');
+  return c.env.SQL_SERVER.get(id);
 }
-

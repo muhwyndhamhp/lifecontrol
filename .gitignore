@@ -2,7 +2,8 @@
 # sst
 .sst
 .env
+.idea
 
 node_modules
-
+dist
 

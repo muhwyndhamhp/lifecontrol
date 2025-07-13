@@ -10,17 +10,39 @@ export default $config({
     };
   },
   async run() {
-    const hono = new sst.cloudflare.Worker('PetaKopi', {
+    const hono = new sst.cloudflare.Worker("LifeControl", {
       url: true,
-      handler: './server/src/index.ts',
+      handler: "./server/src/index.ts",
       assets: {
-        directory: './dist',
+        directory: "./dist",
+      },
+      transform: {
+        worker: (args) => {
+          if (!args.bindings) {
+            return;
+          }
+
+          // args.logpush = true
+          args.bindings = $resolve(args.bindings).apply((bindings) => [
+            ...bindings,
+            {
+              name: "SQL_SERVER",
+              type: "durable_object_namespace",
+              className: "SqlServer",
+            },
+          ]);
+
+          // args.migrations = {
+          //   oldTag: $app.stage === "production" ? "" : "",
+          //   newTag: $app.stage === "production" ? "" : "v1",
+          //   newSqliteClasses: ["SqlServer"],
+          // }
+        },
       },
     });
 
     return {
       api: hono.url,
     };
-
   },
 });
