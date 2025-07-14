@@ -20,7 +20,7 @@
 }
 @layer base {
     :root {
-        --font-size: 16px;
+        --font-size: 14px;
         --font-family: "Zed Mono", "Symbols Nerd Font";
     }
 }

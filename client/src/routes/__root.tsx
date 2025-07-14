@@ -7,7 +7,7 @@ export const Route = createRootRoute({
     <div className={root()}>
       <div shear-={'top'} box-={'round'} className={box()}>
         <div className={header()}>
-          <span is-="badge" variant-="flamingo" cap-={'square triangle'}>Life_Control{'\u00A0'}</span>
+          <span is-="badge" variant-="flamingo" cap-={'square triangle'}>Life Control{' >>'}</span>
         </div>
         <div>
           <Outlet />

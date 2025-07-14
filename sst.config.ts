@@ -3,18 +3,18 @@
 export default $config({
   app(input) {
     return {
-      name: "lifecontrol",
-      removal: input?.stage === "production" ? "retain" : "remove",
-      protect: ["production"].includes(input?.stage),
-      home: "cloudflare",
+      name: 'lifecontrol',
+      removal: input?.stage === 'production' ? 'retain' : 'remove',
+      protect: ['production'].includes(input?.stage),
+      home: 'cloudflare',
     };
   },
   async run() {
-    const hono = new sst.cloudflare.Worker("LifeControl", {
+    const hono = new sst.cloudflare.Worker('LifeControl', {
       url: true,
-      handler: "./server/src/index.ts",
+      handler: './server/src/index.ts',
       assets: {
-        directory: "./dist",
+        directory: './dist',
       },
       transform: {
         worker: (args) => {
@@ -22,13 +22,17 @@ export default $config({
             return;
           }
 
-          // args.logpush = true
+          if (!!args.observability)
+            args.observability =
+              $resolve(args.observability)
+                .apply((observe) => ({ ...observe, enabled: true }));
+
           args.bindings = $resolve(args.bindings).apply((bindings) => [
             ...bindings,
             {
-              name: "SQL_SERVER",
-              type: "durable_object_namespace",
-              className: "SqlServer",
+              name: 'SQL_SERVER',
+              type: 'durable_object_namespace',
+              className: 'SqlServer',
             },
           ]);
 

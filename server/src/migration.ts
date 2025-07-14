@@ -1,23 +1,40 @@
 export function migrate(sql: SqlStorage) {
+  console.log('*** Starting Migration');
 // language=SQL format=false
   sql.exec(`
-      create table if not exists migrations (
+      create table if not exists "migrations" (
         id integer primary key autoincrement,
         name text not null unique,
         applied_at datetime default current_timestamp
       );
     `);
 
-  const applied = new Set();
-  for (const row of sql.exec('select name from migrations')) {
-    applied.add(row.name);
+  const latestRow = sql.exec(`
+      select name
+      from migrations
+      order by id desc limit 1
+  `).one();
+
+  const latestName = latestRow?.name;
+
+  if (latestName === migrations[migrations.length - 1]?.name) {
+    console.log('*** All migrations already applied, skipping...');
+    return;
   }
 
-  for (const migration of migrations) {
-    if (!applied.has(migration.name)) {
-      sql.exec(migration.sql);
-      sql.exec('insert into migrations (name) values (?)', migration.name);
+  let startIndex = 0;
+  if (latestName) {
+    const idx = migrations.findIndex(m => m.name === latestName);
+    if (idx !== -1) {
+      startIndex = idx + 1; // start after the last applied
     }
+  }
+
+  for (let i = startIndex; i < migrations.length; i++) {
+    const migration = migrations[i];
+    console.log('*** Executing Migration:', migration.name);
+    sql.exec(migration.sql);
+    sql.exec('INSERT INTO migrations (name) VALUES (?)', migration.name);
   }
 }
 
@@ -27,11 +44,19 @@ const migrations = [
     name: '001_create_event_table',
     // language=SQL format=false
     sql: `
-    CREATE TABLE IF NOT EXISTS "calendar_events" (
+    create table if not exists "calendar_events" (
       "id" text not null primary key,
-      "date" datetime default current_timestamp
+      "date" datetime default current_timestamp,
       "name" text not null default 'Calendar Event'
-    )
+    );
+    `,
+  },
+  {
+    name: `002_add_duration_and_color`,
+    // language=SQL format=false
+    sql: `
+    alter table "calendar_events" add column "duration" integer not null default 60;
+    alter table "calendar_events" add column "color" text not null default 'mauve';
     `,
   },
 ];

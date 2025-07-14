@@ -8,10 +8,7 @@ export const Route = createFileRoute('/')({
 function Index() {
   return (
     <div style={{
-      paddingTop: '1lh',
-      paddingBottom: '1lh',
-      paddingLeft: '1ch',
-      paddingRight: '1ch',
+      padding: '0lh 1ch',
       display: 'flex',
       flexDirection: 'column'
     }}>
