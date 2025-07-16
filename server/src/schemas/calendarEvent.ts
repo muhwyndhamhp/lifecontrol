@@ -43,6 +43,7 @@ export const createCalendarEventSchema = object({
     pipe(number(), minValue(15), maxValue(120)),
   ]),
   color: fallback(pipe(string(), picklist(Colors)), 'mauve'),
+  description: optional(pipe(string(), minLength(10))),
 });
 
 export const updateCalendarEventSchema = object({
@@ -67,4 +68,5 @@ export interface CalendarEventTable {
   duration: number;
   color: (typeof Colors)[number];
   deleted_at?: Date;
+  description?: string;
 }

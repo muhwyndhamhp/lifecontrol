@@ -64,5 +64,9 @@ const migrations = [
     sql: `
     alter table "calendar_events" add column "deleted_at" datetime;
     `
+  },
+  {
+    name: `004_add_description`,
+    sql: `alter table "calendar_events" add column "description" text;`
   }
 ];

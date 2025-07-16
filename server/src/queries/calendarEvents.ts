@@ -36,6 +36,7 @@ export async function createEvents(
       date: input.date,
       duration: input.duration,
       color: input.color,
+      description: input.description,
     })
     .executeTakeFirst();
 
@@ -57,6 +58,7 @@ export async function updateEvents(
       date: input.date,
       duration: input.duration,
       color: input.color,
+      description: input.description,
     })
     .where('calendar_events.id', '=', input.id)
     .executeTakeFirst();
