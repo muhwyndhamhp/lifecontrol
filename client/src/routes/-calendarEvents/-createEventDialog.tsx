@@ -75,28 +75,30 @@ export function CreateEventDialog({
 
       onSubmit();
     },
-    [formRef, existing]
+    [formRef, existing, dialogRef]
   );
 
   const deleteEvent = useCallback(
-    async (id: string) => {
-      const blob = await client.api.events.delete.$post({
-        query: {
-          id: id
-        }
+    async (e: FormEvent) => {
+      e.preventDefault();
+
+      const blob = await client.api.events[':id'].$delete({
+        param: {
+          id: existing?.id ?? '',
+        },
       });
 
       const res = await blob.json();
 
       if (!res.success) {
-        console.log('Create event not successful');
+        console.log('Delete event not successful');
       }
 
       dialogRef.current?.togglePopover();
 
       onSubmit();
     },
-    [formRef, existing]
+    [dialogRef, existing]
   );
 
   const dateString = formatDateTimeLocal(
@@ -179,7 +181,7 @@ export function CreateEventDialog({
             {existing ? 'Update' : 'Create'}
           </button>
           {existing && (
-            <button box-="round" type="submit" onClick={() => deleteEvent(existing?.id)}>
+            <button box-="round" type="submit" onClick={deleteEvent}>
               Delete
             </button>
           )}

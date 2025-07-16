@@ -10,10 +10,15 @@ import {
 import { handleAssets } from './assets';
 
 const apiApp = new Hono<{ Bindings: Env }>()
+  .delete('/events/:id', async (c) => {
+    const id = c.req.param('id');
+    const sql = getSqlFromContext(c);
+    const res = await unwrap(sql.deleteCalendarEvent(id));
+    return c.json(res);
+  })
   .get('/events', vValidator('query', getCalendarEvents), async (c) => {
     const sql = getSqlFromContext(c);
     const data = c.req.valid('query');
-
     const res = await unwrap(
       sql.getCalendarEvents(data.startDate, data.endDate)
     );
@@ -25,7 +30,6 @@ const apiApp = new Hono<{ Bindings: Env }>()
     async (c) => {
       const sql = getSqlFromContext(c);
       const data = c.req.valid('json');
-
       const res = await unwrap(sql.createCalendarEvents(data));
       return c.json(res);
     }
@@ -36,25 +40,10 @@ const apiApp = new Hono<{ Bindings: Env }>()
     async (c) => {
       const sql = getSqlFromContext(c);
       const data = c.req.valid('json');
-
       const res = await unwrap(sql.updateCalendarEvents(data));
       return c.json(res);
     }
-  )
-  .post('/events/delete', async (c) => {
-    const id = c.req.query('id') ?? '';
-
-    if (id.trim() === '') {
-      return c.json({
-        success: false,
-        id: id,
-      });
-    }
-
-    const sql = getSqlFromContext(c);
-    const res = await unwrap(sql.deleteCalendarEvent(id));
-    return c.json(res);
-  });
+  );
 
 const app = new Hono<{ Bindings: Env }>()
   .use(
