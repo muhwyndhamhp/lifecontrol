@@ -7,6 +7,8 @@
 @import "@webtui/css/components/badge.css";
 @import "@webtui/css/components/separator.css";
 @import "@webtui/css/components/table.css";
+@import "@webtui/css/components/spinner.css";
+@import "@webtui/css/components/radio.css";
 
 /* Must be Last */
 @import "@webtui/plugin-nf";

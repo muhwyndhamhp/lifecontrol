@@ -1,13 +1,15 @@
 import { createRootRoute, Outlet } from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
-import { createStitches } from '@stitches/react';
+import { css } from '@stitches/react';
 
 export const Route = createRootRoute({
   component: () => (
     <div className={root()}>
       <div shear-={'top'} box-={'round'} className={box()}>
         <div className={header()}>
-          <span is-="badge" variant-="flamingo" cap-={'square triangle'}>Life Control{' >>'}</span>
+          <span is-="badge" variant-="flamingo" cap-={'square triangle'}>
+            Life Control{' >>'}
+          </span>
         </div>
         <div>
           <Outlet />
@@ -17,8 +19,6 @@ export const Route = createRootRoute({
     </div>
   ),
 });
-
-const { css } = createStitches();
 
 const box = css({
   height: '100%',
@@ -40,4 +40,3 @@ const header = css({
   fontSize: '18px',
   whiteSpace: 'pre',
 });
-

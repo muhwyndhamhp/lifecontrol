@@ -2,10 +2,18 @@ import { DurableObject } from 'cloudflare:workers';
 import { Kysely } from 'kysely';
 import { DODialect } from 'kysely-do';
 import { migrate } from './migration';
-import { createEvents, getCalendarEvents } from './queries/calendarEvents';
+import {
+  createEvents,
+  deleteEvent,
+  getCalendarEvents,
+  updateEvents,
+} from './queries/calendarEvents';
 import { Database } from './schemas/database';
 import { InferOutput } from 'valibot';
-import { createCalendarEventSchema } from './schemas/calendarEvent';
+import {
+  createCalendarEventSchema,
+  updateCalendarEventSchema,
+} from './schemas/calendarEvent';
 import { Context } from 'hono';
 
 export interface Env {
@@ -31,9 +39,19 @@ export class SqlServer extends DurableObject<Env> {
   }
 
   async createCalendarEvents(
-    input: InferOutput<typeof createCalendarEventSchema>,
+    input: InferOutput<typeof createCalendarEventSchema>
   ) {
     return await createEvents(this.db, input);
+  }
+
+  async updateCalendarEvents(
+    input: InferOutput<typeof updateCalendarEventSchema>
+  ) {
+    return await updateEvents(this.db, input);
+  }
+
+  async deleteCalendarEvent(id: string) {
+    return await deleteEvent(this.db, id);
   }
 }
 
@@ -55,4 +73,3 @@ export async function unwrap<T>(promise: Promise<T & Disposable>): Promise<T> {
     }
   }
 }
-

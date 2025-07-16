@@ -1,61 +1,63 @@
 import {
   custom,
-  date,
-  isoDateTime, isoTimestamp,
+  fallback,
   maxValue,
   minLength,
   minValue,
   number,
   object,
   optional,
+  picklist,
   pipe,
   string,
   transform,
   union,
 } from 'valibot';
 import { validate, version } from 'uuid';
-import { stripDate } from './helper';
+import { dateTime } from './helper';
 
 const isUuidV4 = (id: string) => validate(id) && version(id) === 4;
 
+export const Colors = [
+  'mauve',
+  'teal',
+  'flamingo',
+  'peach',
+  'sky',
+  'sapphire',
+  'green',
+  'rosewater',
+] as const;
+
+export const createCalendarEventSchema = object({
+  name: pipe(string(), minLength(1)),
+  date: pipe(dateTime()),
+  duration: union([
+    pipe(
+      string(),
+      transform((v) => Number(v)),
+      number(),
+      minValue(15),
+      maxValue(120)
+    ),
+    pipe(number(), minValue(15), maxValue(120)),
+  ]),
+  color: fallback(pipe(string(), picklist(Colors)), 'mauve'),
+});
+
 export const updateCalendarEventSchema = object({
+  ...createCalendarEventSchema.entries,
   id: pipe(
     string(),
     custom((value) => {
       return isUuidV4(value as string);
-    }),
+    })
   ),
-  name: pipe(string(), minLength(1)),
-  date: pipe(date()),
-});
-
-export const createCalendarEventSchema = object({
-  name: pipe(string(), minLength(1)),
-  date: pipe(date()),
-  duration: pipe(number(), minValue(15), maxValue(120)),
-  color: pipe(string(), transform((value) => (value as Colors))),
 });
 
 export const getCalendarEvents = object({
-  startDate: optional(union([
-    pipe(
-      string(),
-      stripDate(),
-      isoTimestamp(),
-      transform((input) => new Date(input)),
-    ),
-    date(),
-  ])),
-
-  endDate: optional(union([
-    pipe(
-      string(),
-      stripDate(),
-      isoTimestamp(),
-      transform((input) => new Date(input)),
-    ),
-    date(),
-  ])),
+  startDate: optional(dateTime()),
+  endDate: optional(dateTime()),
 });
 
 export interface CalendarEventTable {
@@ -63,7 +65,6 @@ export interface CalendarEventTable {
   name: string;
   date: Date;
   duration: number;
-  color: Colors;
+  color: (typeof Colors)[number];
+  deleted_at?: Date;
 }
-
-type Colors = 'mauve' | 'teal' | 'flamingo' | 'peach' | 'sky' | 'sapphire' | 'green' | 'rosewater'

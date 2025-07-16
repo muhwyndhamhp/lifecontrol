@@ -1,6 +1,6 @@
 export function migrate(sql: SqlStorage) {
   console.log('*** Starting Migration');
-// language=SQL format=false
+  // language=SQL format=false
   sql.exec(`
       create table if not exists "migrations" (
         id integer primary key autoincrement,
@@ -9,13 +9,13 @@ export function migrate(sql: SqlStorage) {
       );
     `);
 
-  const latestRow = sql.exec(`
-      select name
-      from migrations
-      order by id desc limit 1
-  `).one();
+  const result = sql.exec('SELECT COUNT(*) as count FROM migrations').one();
 
-  const latestName = latestRow?.name;
+  const latestName =
+    Number(result['count']) > 0
+      ? sql.exec('select name from migrations order by id desc limit 1').one()
+        .name
+      : '';
 
   if (latestName === migrations[migrations.length - 1]?.name) {
     console.log('*** All migrations already applied, skipping...');
@@ -24,7 +24,7 @@ export function migrate(sql: SqlStorage) {
 
   let startIndex = 0;
   if (latestName) {
-    const idx = migrations.findIndex(m => m.name === latestName);
+    const idx = migrations.findIndex((m) => m.name === latestName);
     if (idx !== -1) {
       startIndex = idx + 1; // start after the last applied
     }
@@ -59,4 +59,10 @@ const migrations = [
     alter table "calendar_events" add column "color" text not null default 'mauve';
     `,
   },
+  {
+    name: `003_add_deleted_at`,
+    sql: `
+    alter table "calendar_events" add column "deleted_at" datetime;
+    `
+  }
 ];
