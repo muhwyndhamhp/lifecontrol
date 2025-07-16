@@ -177,11 +177,21 @@ export function CreateEventDialog({
               ))}
             </div>
           </div>
-          <button onClick={submit} type="submit">
+          <button
+            variant-="mauve"
+            onClick={submit}
+            type="submit"
+            style={{ width: 'calc(100% - 1ch)', margin: '0lh auto' }}
+          >
             {existing ? 'Update' : 'Create'}
           </button>
           {existing && (
-            <button box-="round" type="submit" onClick={deleteEvent}>
+            <button
+              variant-="red"
+              box-="round"
+              type="submit"
+              onClick={deleteEvent}
+            >
               Delete
             </button>
           )}
@@ -208,8 +218,7 @@ const content = css({
   padding: '0lh 1ch',
   display: 'flex',
   flexDirection: 'column',
-  height: '96%',
-  overflowY: 'scroll',
+  height: 'calc(100% - 2lh)',
 });
 
 const inputBox = css({

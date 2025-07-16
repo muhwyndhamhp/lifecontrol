@@ -73,8 +73,8 @@ export function CalendarEvents() {
 }
 
 const createButton = css({
-  marginLeft: 'auto',
-  marginRight: '0.3ch',
+  margin: '0lh auto',
+  width: 'calc(100% - 1ch)'
 });
 
 const spannableButton = css({
@@ -108,8 +108,7 @@ const content = css({
 });
 
 const box = css({
-  maxHeight: '100%',
-  height: '30lh',
+  height: 'calc(100vh - 7lh)',
   width: '50ch',
   '--box-border-color': 'var(--background3)',
 });
