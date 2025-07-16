@@ -15,7 +15,7 @@ export function EventSlot({ events, refetch }: eventSlotProps) {
   return (
     <>
       {events &&
-        events.map((event, idx) => {
+        events.map((event) => {
           const date = new Date(event.date);
           const hours = date.getHours();
           const minutes = Math.floor(date.getMinutes() / 15) * 15;
@@ -27,7 +27,7 @@ export function EventSlot({ events, refetch }: eventSlotProps) {
             <>
               <div
                 popoverTarget={`dialog-${event.id}`}
-                key={idx}
+                key={`event-slot-${event.id}`}
                 onClick={(e) => {
                   e.preventDefault();
                   document
@@ -45,6 +45,7 @@ export function EventSlot({ events, refetch }: eventSlotProps) {
               </div>
 
               <CreateEventDialog
+                key={`event-slot-dialog-${event.id}`}
                 existing={event}
                 onSubmit={refetch}
                 idSuffix={event.id}
