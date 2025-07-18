@@ -1,6 +1,32 @@
 import { css } from '@stitches/react';
+import { useCallback, useState } from 'react';
+import { client } from '../../fetcher.ts';
 
 export function ChatBox() {
+  const [chatHistory, setChatHistory] = useState<string[]>([]);
+
+  const submitPrompts = useCallback(
+    async (message: string) => {
+      setChatHistory((prev) => {
+        return [...prev, JSON.stringify(message, null, 2)];
+      });
+
+      const response = await client.api.prompt.$post({
+        json: {
+          prompt: message,
+        },
+      });
+
+      const resJson = await response.json();
+      setChatHistory((prev) => {
+        return [...prev, JSON.stringify(resJson, null, 2)];
+      });
+    },
+    [setChatHistory]
+  );
+
+  console.log(chatHistory);
+
   return (
     <>
       <div className={chatBox()}>
@@ -10,7 +36,23 @@ export function ChatBox() {
             width: '100%',
             height: 'calc(100vh - 7lh)',
           }}
-        ></div>
+        >
+          {chatHistory.map((v, i) => {
+            return (
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  backgroundColor:
+                    i % 2 === 0 ? 'var(--background0)' : 'var(--background2)',
+                }}
+              >
+                {v}
+                <div is-="separator"></div>
+              </div>
+            );
+          })}
+        </div>
         <label box-="round" shear-="top">
           <div style={{ display: 'flex' }}>
             <span is-="badge" variant-="background0">
@@ -20,6 +62,11 @@ export function ChatBox() {
           <input
             name="name"
             contentEditable
+            onKeyUp={(e) => {
+              if (e.key === 'Enter') {
+                submitPrompts(e.currentTarget.value);
+              }
+            }}
             className={inputBox()}
             placeholder={'Birthday'}
           ></input>
@@ -44,7 +91,7 @@ const inputBox = css({
   color: 'var(--text)',
   padding: '0.25lh 1ch',
   fontFamily: 'Zed Mono',
-  minWidth: '45ch',
+  width: '100%',
   background: 'var(--background0)',
   borderColor: 'transparent',
 });

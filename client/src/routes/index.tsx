@@ -8,15 +8,19 @@ export const Route = createFileRoute('/')({
 
 function Index() {
   return (
-    <div style={{
-      padding: '0lh 1ch',
-      display: 'flex',
-      flexDirection: 'column'
-    }}>
-      <div style={{
+    <div
+      style={{
+        padding: '0lh 1ch',
         display: 'flex',
-        flexDirection: 'row-reverse'
-      }}>
+        flexDirection: 'column',
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'row-reverse',
+        }}
+      >
         <CalendarEvents />
         <ChatBox />
       </div>

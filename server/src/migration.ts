@@ -63,10 +63,10 @@ const migrations = [
     name: `003_add_deleted_at`,
     sql: `
     alter table "calendar_events" add column "deleted_at" datetime;
-    `
+    `,
   },
   {
     name: `004_add_description`,
-    sql: `alter table "calendar_events" add column "description" text;`
-  }
+    sql: `alter table "calendar_events" add column "description" text;`,
+  },
 ];
