@@ -37,6 +37,5 @@ const header = css({
   fontWeight: 'bolder',
   justifyContent: 'space-between',
   padding: '0lh 1ch',
-  fontSize: '18px',
   whiteSpace: 'pre',
 });

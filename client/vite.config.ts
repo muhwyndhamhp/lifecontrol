@@ -25,7 +25,6 @@ export default defineConfig({
           'https://lifecontrol-wyndham-lifecontrolscript-kzzhbuwd.mwyndham-business.workers.dev',
         changeOrigin: true,
         secure: true,
-        logLevel: 'info', // use `true` if your backend has a valid SSL cert
         cookieDomainRewrite: 'localhost', // rewrite cookie domain to local
       },
     },

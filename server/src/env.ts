@@ -1,11 +1,14 @@
 import { DurableObject } from 'cloudflare:workers';
-import { Kysely } from 'kysely';
+import { Kysely, LogEvent } from 'kysely';
 import { DODialect } from 'kysely-do';
 import { migrate } from './migration';
 import {
+  createByPrompts,
   createEvents,
   deleteEvent,
   getCalendarEvents,
+  queryByPrompts,
+  updateByPrompts,
   updateEvents,
 } from './queries/calendarEvents';
 import { Database } from './schemas/database';
@@ -15,6 +18,11 @@ import {
   updateCalendarEventSchema,
 } from './schemas/calendarEvent';
 import { Context } from 'hono';
+import {
+  internalCreateSchema,
+  internalQuerySchema,
+  internalUpdateSchema,
+} from './llm/types';
 
 export interface Env {
   ASSETS: Fetcher;
@@ -31,6 +39,22 @@ export class SqlServer extends DurableObject<Env> {
 
     this.db = new Kysely<Database>({
       dialect: new DODialect({ ctx }),
+      log(event: LogEvent) {
+        if (event.level === 'query') {
+          console.log('--- Kysely Query ---');
+          console.log('SQL:', event.query.sql);
+          console.log('Parameters:', event.query.parameters);
+          console.log('Duration (ms):', event.queryDurationMillis);
+          console.log('--------------------');
+        } else if (event.level === 'error') {
+          console.error('--- Kysely Error ---');
+          console.error('SQL:', event.query.sql);
+          console.error('Parameters:', event.query.parameters);
+          console.error('Error:', event.error);
+          console.error('Duration (ms):', event.queryDurationMillis);
+          console.error('--------------------');
+        }
+      },
     });
   }
 
@@ -52,6 +76,18 @@ export class SqlServer extends DurableObject<Env> {
 
   async deleteCalendarEvent(id: string) {
     return await deleteEvent(this.db, id);
+  }
+
+  async queryByPrompts(query: InferOutput<typeof internalQuerySchema>) {
+    return await queryByPrompts(this.db, query);
+  }
+
+  async createByPrompts(query: InferOutput<typeof internalCreateSchema>) {
+    return await createByPrompts(this.db, query);
+  }
+
+  async updateByPrompts(query: InferOutput<typeof internalUpdateSchema>) {
+    return await updateByPrompts(this.db, query);
   }
 }
 

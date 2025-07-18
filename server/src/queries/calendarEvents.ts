@@ -1,4 +1,4 @@
-import { Kysely } from 'kysely';
+import { ComparisonOperatorExpression, Kysely, sql } from 'kysely';
 import { Database } from '../schemas/database';
 import { InferOutput } from 'valibot';
 import {
@@ -6,12 +6,90 @@ import {
   updateCalendarEventSchema,
 } from '../schemas/calendarEvent';
 import { v4 } from 'uuid';
+import {
+  internalCreateSchema,
+  internalQuerySchema,
+  internalUpdateSchema,
+} from '../llm/types';
+
+export async function updateByPrompts(
+  db: Kysely<Database>,
+  update: InferOutput<typeof internalUpdateSchema>
+) {
+  let q = db.updateTable('calendar_events');
+
+  update.set.forEach((v) => {
+    q = q.set(sql`${v.column}`, sql`${v.value}`);
+  });
+
+  update.whereStatements.forEach((v) => {
+    console.log('Where: ', v);
+    q = q.where(
+      sql`${v.column}`,
+      v.control as ComparisonOperatorExpression,
+      sql`${v.value}`
+    );
+  });
+
+  const result = await q.execute();
+
+  console.log('***Update By Propmt: ', result);
+
+  return {
+    success: !!(result.length ?? 0n > 0n),
+  };
+}
+
+export async function createByPrompts(
+  db: Kysely<Database>,
+  create: InferOutput<typeof internalCreateSchema>
+) {
+  const result = await db
+    .insertInto('calendar_events')
+    .values({
+      id: v4(),
+      name: create.name,
+      date: new Date(create.date),
+      duration: create.duration,
+      color: create.color,
+      description: create.description,
+    })
+    .executeTakeFirst();
+
+  console.log('***Create By Propmt: ', result);
+
+  return {
+    success: !!(result.numInsertedOrUpdatedRows ?? 0n > 0n),
+    id: create.id,
+  };
+}
+
+export async function queryByPrompts(
+  db: Kysely<Database>,
+  query: InferOutput<typeof internalQuerySchema>
+) {
+  let q = db.selectFrom('calendar_events').selectAll();
+  query.whereStatements.forEach((v) => {
+    q = q.where(sql`${v.column}`, sql`${v.control}`, sql`${v.value}`);
+  });
+
+  q = q.limit(query.paginate.limit).offset(query.paginate.offset);
+
+  const result = await q.execute();
+
+  console.log('***Query By Propmt: ', result);
+
+  return result;
+}
 
 export async function getCalendarEvents(
   db: Kysely<Database>,
   dateStart?: Date,
   dateEnd?: Date
 ) {
+  console.log('***Start Date: ', dateStart);
+  console.log('***End Date: ', dateEnd);
+
   let q = db
     .selectFrom('calendar_events')
     .where('calendar_events.deleted_at', 'is', null)

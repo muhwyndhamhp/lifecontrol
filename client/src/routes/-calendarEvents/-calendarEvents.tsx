@@ -74,7 +74,7 @@ export function CalendarEvents() {
 
 const createButton = css({
   margin: '0lh auto',
-  width: 'calc(100% - 1ch)'
+  width: 'calc(100% - 1ch)',
 });
 
 const spannableButton = css({

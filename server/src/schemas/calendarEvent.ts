@@ -2,7 +2,6 @@ import {
   custom,
   fallback,
   maxValue,
-  minLength,
   minValue,
   number,
   object,
@@ -30,7 +29,7 @@ export const Colors = [
 ] as const;
 
 export const createCalendarEventSchema = object({
-  name: pipe(string(), minLength(1)),
+  name: pipe(string()),
   date: pipe(dateTime()),
   duration: union([
     pipe(
@@ -43,7 +42,7 @@ export const createCalendarEventSchema = object({
     pipe(number(), minValue(15), maxValue(120)),
   ]),
   color: fallback(pipe(string(), picklist(Colors)), 'mauve'),
-  description: optional(pipe(string(), minLength(10))),
+  description: optional(pipe(string())),
 });
 
 export const updateCalendarEventSchema = object({
@@ -64,7 +63,7 @@ export const getCalendarEvents = object({
 export interface CalendarEventTable {
   id: string;
   name: string;
-  date: Date;
+  date: Date | string;
   duration: number;
   color: (typeof Colors)[number];
   deleted_at?: Date;
