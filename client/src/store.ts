@@ -5,9 +5,11 @@ type RefetchCalendarState = {
     start: Date;
     end: Date;
   };
+  refetch: boolean;
   setRange: (range?: { start: Date; end: Date }) => void;
   nextDay: () => void;
   previousDay: () => void;
+  toggleRefetch: () => void;
 };
 
 export const refetchCalendar: StateCreator<RefetchCalendarState> = (
@@ -22,8 +24,9 @@ export const refetchCalendar: StateCreator<RefetchCalendarState> = (
   return {
     range: { start, end },
     setRange: (range) => {
-      set({ range });
+      set({ range, refetch: true });
     },
+    refetch: false,
     nextDay: () => {
       const range = get().range;
 
@@ -43,6 +46,10 @@ export const refetchCalendar: StateCreator<RefetchCalendarState> = (
       newEnd.setDate(range.end.getDate() - 1);
 
       set({ range: { start: newStart, end: newEnd } });
+    },
+
+    toggleRefetch: () => {
+      set({ refetch: !get().refetch });
     },
   };
 };

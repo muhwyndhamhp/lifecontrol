@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { CalendarEvents } from './-calendarEvents/-calendarEvents.tsx';
-import { ChatBox } from './-chatBox/-chatBox.tsx';
+import { ChatBox } from './-chatBox/ChatBox.tsx';
 
 export const Route = createFileRoute('/')({
   component: Index,

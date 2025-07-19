@@ -18,19 +18,41 @@ export async function updateByPrompts(
 ) {
   let q = db.updateTable('calendar_events');
 
+  const { ref } = db.dynamic;
+
+  console.log('*** Update: ', JSON.stringify(update, null, 2));
   update.set.forEach((v) => {
-    q = q.set(sql`${v.column}`, sql`${v.value}`);
+    q = q.set(sql`${ref(v.column)}`, sql`${v.value}`);
   });
 
   update.whereStatements.forEach((v) => {
-    q = q.where(
-      sql`${v.column}`,
-      v.control as ComparisonOperatorExpression,
-      sql`${v.value}`
-    );
+    let query = sql`${ref(v.column)}`;
+    let value = sql`${v.value}`;
+
+    const isLower =
+      ref(v.column).dynamicReference === 'calendar_events.name' ||
+      ref(v.column).dynamicReference === 'calendar_events.description';
+
+    const isDate = ref(v.column).dynamicReference === 'calendar_events.date';
+
+    if (isLower) {
+      query = sql`lower(
+      ${ref(v.column)}
+      )`;
+    }
+
+    if (isDate) {
+      // @formatter:off
+      query = sql`${ref('calendar_events.date_unix')}`;
+      value = sql`${new Date(v.value).getTime() / 1000}`;
+    }
+
+    q = q.where(query, v.control as ComparisonOperatorExpression, value);
   });
 
   const result = await q.returningAll().execute();
+
+  console.log('*** Result: ', result);
 
   return {
     success: !!result,

@@ -5,25 +5,39 @@ import { TimeSlot } from './-timeSlot.tsx';
 import { EventSlot } from './-eventSlot.tsx';
 import { CreateEventDialog } from './-createEventDialog.tsx';
 import { useAppStore } from '../../store.ts';
+import { useEffect } from 'react';
 
 export function CalendarEvents() {
   const { start, end } = useAppStore((state) => state.range);
+  const refetch = useAppStore((state) => state.refetch);
+  const toggleRefetch = useAppStore((state) => state.toggleRefetch);
   const nextDay = useAppStore((state) => state.nextDay);
   const previousDay = useAppStore((state) => state.previousDay);
 
   const {
     data: events,
     isLoading,
-    refetch,
+    refetch: refetching,
   } = useQuery({
     queryKey: ['calendarEvents', start, end],
     queryFn: rpcFetch(client.api.events.$get)({
       query: {
-        startDate: (start.getTime()  / 1000).toString(),
-        endDate: (end.getTime()  / 1000).toString(),
+        startDate: (start.getTime() / 1000).toString(),
+        endDate: (end.getTime() / 1000).toString(),
       },
     }),
   });
+
+  useEffect(() => {
+    const a = async () => {
+      if (refetch) {
+        await refetching();
+        toggleRefetch();
+      }
+    };
+
+    a();
+  }, [refetch, refetching, toggleRefetch]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -50,13 +64,13 @@ export function CalendarEvents() {
         </div>
         <div className={content()}>
           <TimeSlot />
-          <EventSlot events={events} refetch={refetch} />
+          <EventSlot events={events} refetch={refetching} />
         </div>
       </div>
       <button popoverTarget={'dialog'} className={createButton()}>
         Add Event
       </button>
-      <CreateEventDialog onSubmit={refetch} />
+      <CreateEventDialog onSubmit={refetching} />
     </div>
   );
 }

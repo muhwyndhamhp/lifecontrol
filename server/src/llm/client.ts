@@ -54,11 +54,14 @@ export async function OperationFromPrompt(prompt: string, timeOffset: number) {
           then you should return structured output with the __typename of 'Update'.
           You then should populate the fields based on following criteria:
             + set: is an array of object that indicates what column should be modified. 
-              * column should be in "table_name"."column_name" format
+              * column should be in column_name ONLY format
               * value should be in corresponding type and value 
             + whereStatements: is an array that indicates the conditions to discriminate which row to modify. 
-              * column should be in "table_name"."column_name" format
-              * when dealing with text column, such as name and description, please match by lowercase (ex. lower(calendar_events.name)) on column and use LIKE '%queryparam%' 
+              * column should be in table_name.column_name format
+              * when dealing with text column, such as name and description, please use LIKE '%queryparam%' 
+              * please always add date range where statement that matches user's requirement whenever possible, 
+                for example if user said "please update today's dinner" then make sure it has where table_name.table_column >= 'beginning of day' and where table_name.table_column <= 'end of day'
+                BUT PLEASE AVOID DATE EQUALITY EXPRESSION.
               * value should be in corresponding type and value 
               * control indicates the control flow using kysely dialect format  (Ex. '=', 'like', 'not in')
               
