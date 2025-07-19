@@ -1,6 +1,6 @@
 import type { CalendarEventTable } from '@server/schemas/calendarEvent.ts';
 import { css } from '@stitches/react';
-import { CreateEventDialog } from './-createEventDialog';
+import { CreateEventDialog } from './CreateEventDialog.tsx';
 
 export type CalendarEvent = Omit<CalendarEventTable, 'date' | 'deleted_at'> & {
   date: string;

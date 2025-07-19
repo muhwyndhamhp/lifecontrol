@@ -1,5 +1,5 @@
 import { useAppStore } from '../../../../../store.ts';
-import type { CalendarEvent } from '../../../../-calendarEvents/-eventSlot.tsx';
+import type { CalendarEvent } from '../../../../-calendarEvents/components/EventSlot.tsx';
 
 type StructuredResponseProps = {
   event: CalendarEvent;

@@ -2,12 +2,12 @@ import {
   Colors,
   createCalendarEventSchema,
   updateCalendarEventSchema,
-} from '@server/schemas/calendarEvent';
+} from '@server/schemas/calendarEvent.ts';
 import { css } from '@stitches/react';
 import { type FormEvent, useCallback, useRef } from 'react';
 import { safeParse } from 'valibot';
-import { client } from '../../fetcher';
-import type { CalendarEvent } from './-eventSlot';
+import { client } from '../../../fetcher.ts';
+import type { CalendarEvent } from './EventSlot.tsx';
 import { type ClientResponse } from 'hono/client';
 
 export interface CreateEventDialogProps {
