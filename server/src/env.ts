@@ -58,7 +58,7 @@ export class SqlServer extends DurableObject<Env> {
     });
   }
 
-  async getCalendarEvents(dateStart?: Date, dateEnd?: Date) {
+  async getCalendarEvents(dateStart?: number, dateEnd?: number) {
     return await getCalendarEvents(this.db, dateStart, dateEnd);
   }
 
@@ -82,8 +82,8 @@ export class SqlServer extends DurableObject<Env> {
     return await queryByPrompts(this.db, query);
   }
 
-  async createByPrompts(query: InferOutput<typeof internalCreateSchema>) {
-    return await createByPrompts(this.db, query);
+  async createByPrompts(query: InferOutput<typeof internalCreateSchema>, offsetHour: number) {
+    return await createByPrompts(this.db, query, offsetHour);
   }
 
   async updateByPrompts(query: InferOutput<typeof internalUpdateSchema>) {

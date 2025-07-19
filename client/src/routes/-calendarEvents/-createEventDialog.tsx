@@ -4,7 +4,7 @@ import {
   updateCalendarEventSchema,
 } from '@server/schemas/calendarEvent';
 import { css } from '@stitches/react';
-import { useCallback, useRef, type FormEvent } from 'react';
+import { type FormEvent, useCallback, useRef } from 'react';
 import { safeParse } from 'valibot';
 import { client } from '../../fetcher';
 import type { CalendarEvent } from './-eventSlot';
@@ -41,6 +41,7 @@ export function CreateEventDialog({
       if (!existing) {
         const parsed = safeParse(createCalendarEventSchema, {
           ...values,
+          dateUnix: new Date(values['date'] as string).getTime() / 1000,
         });
 
         if (!parsed.success) {
@@ -54,6 +55,7 @@ export function CreateEventDialog({
         const parsed = safeParse(updateCalendarEventSchema, {
           ...values,
           id: existing.id,
+          dateUnix: new Date(values['date'] as string).getTime() / 1000,
         });
 
         if (!parsed.success) {

@@ -31,6 +31,7 @@ export const Colors = [
 export const createCalendarEventSchema = object({
   name: pipe(string()),
   date: pipe(dateTime()),
+  dateUnix: pipe(number(), minValue(0)),
   duration: union([
     pipe(
       string(),
@@ -56,14 +57,27 @@ export const updateCalendarEventSchema = object({
 });
 
 export const getCalendarEvents = object({
-  startDate: optional(dateTime()),
-  endDate: optional(dateTime()),
+  startDate: optional(
+    pipe(
+      string(),
+      transform((v: string) => parseInt(v)),
+      number()
+    )
+  ),
+  endDate: optional(
+    pipe(
+      string(),
+      transform((v: string) => parseInt(v)),
+      number()
+    )
+  ),
 });
 
 export interface CalendarEventTable {
   id: string;
   name: string;
-  date: Date | string;
+  date: Date | string; // Deprecated due to ultra confusion in date management
+  date_unix: number;
   duration: number;
   color: (typeof Colors)[number];
   deleted_at?: Date;

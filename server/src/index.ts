@@ -8,10 +8,16 @@ import {
   updateCalendarEventSchema,
 } from './schemas/calendarEvent';
 import { handleAssets } from './assets';
-import { object, string } from 'valibot';
+import { InferOutput, number, object, string } from 'valibot';
 import { OperationFromPrompt } from './llm/client';
+import {
+  promptResponseCreate,
+  promptResponseQuery,
+  promptResponseUpdate,
+  promptStructuredResponseSchema,
+} from './llm/types';
 
-const prompt = object({ prompt: string() });
+const prompt = object({ prompt: string(), hourOffset: number() });
 const apiApp = new Hono<{ Bindings: Env }>()
   .delete('/events/:id', async (c) => {
     const id = c.req.param('id');
@@ -22,36 +28,66 @@ const apiApp = new Hono<{ Bindings: Env }>()
   .post('/prompt', vValidator('json', prompt), async (c) => {
     const data = c.req.valid('json');
     const sql = getSqlFromContext(c);
-    console.log('*** Request coming in...');
-
-    const llmRes = await OperationFromPrompt(data.prompt);
+    const llmRes = await OperationFromPrompt(data.prompt, data.hourOffset);
+    console.log(JSON.stringify(llmRes, null, 2));
 
     if (!llmRes.success) {
       return c.json({
         promptResponse:
           'error during understanding your request, please try again',
-      });
+        result: { __typename: 'None' },
+      } as InferOutput<typeof promptStructuredResponseSchema>);
     }
-
-    console.log('*** LLM Response', JSON.stringify(llmRes, null, 2));
 
     const res = llmRes.response.operation;
 
     switch (res.__typename) {
       case 'Query': {
         const r = await unwrap(sql.queryByPrompts(res));
-        return c.json({ ...r, promptResponse: llmRes.response.response });
+        return c.json({
+          promptResponse: llmRes.response.response,
+          result: {
+            __typename: 'Query',
+            events: r.map((v) => ({
+              ...v,
+              __typename: 'Create',
+            })),
+          } as InferOutput<typeof promptResponseQuery>,
+        } as InferOutput<typeof promptStructuredResponseSchema>);
       }
       case 'Create': {
-        const r = await unwrap(sql.createByPrompts(res));
-        return c.json({ ...r, promptResponse: llmRes.response.response });
+        const r = await unwrap(sql.createByPrompts(res, data.hourOffset));
+        return c.json({
+          promptResponse: llmRes.response.response,
+          result: {
+            __typename: 'Create',
+            events: [
+              {
+                __typename: 'Create',
+                ...r.event,
+              },
+            ],
+          } as InferOutput<typeof promptResponseCreate>,
+        } as InferOutput<typeof promptStructuredResponseSchema>);
       }
       case 'Update': {
         const r = await unwrap(sql.updateByPrompts(res));
-        return c.json({ ...r, promptResponse: llmRes.response.response });
+        return c.json({
+          promptResponse: llmRes.response.response,
+          result: {
+            __typename: 'Update',
+            events: r.event.map((v) => ({
+              ...v,
+              __typename: 'Create',
+            })),
+          } as InferOutput<typeof promptResponseUpdate>,
+        } as InferOutput<typeof promptStructuredResponseSchema>);
       }
       case 'None': {
-        return c.json({ promptResponse: llmRes.response.response });
+        return c.json({
+          promptResponse: llmRes.response.response,
+          result: { __typename: 'None' },
+        } as InferOutput<typeof promptStructuredResponseSchema>);
       }
     }
   })

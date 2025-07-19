@@ -23,7 +23,6 @@ export async function updateByPrompts(
   });
 
   update.whereStatements.forEach((v) => {
-    console.log('Where: ', v);
     q = q.where(
       sql`${v.column}`,
       v.control as ComparisonOperatorExpression,
@@ -31,36 +30,39 @@ export async function updateByPrompts(
     );
   });
 
-  const result = await q.execute();
-
-  console.log('***Update By Propmt: ', result);
+  const result = await q.returningAll().execute();
 
   return {
-    success: !!(result.length ?? 0n > 0n),
+    success: !!result,
+    event: result,
   };
 }
 
 export async function createByPrompts(
   db: Kysely<Database>,
-  create: InferOutput<typeof internalCreateSchema>
+  create: InferOutput<typeof internalCreateSchema>,
+  offsetHour: number
 ) {
+  const date = new Date(create.date);
+  date.setHours(date.getHours() + offsetHour);
+
   const result = await db
     .insertInto('calendar_events')
     .values({
       id: v4(),
       name: create.name,
-      date: new Date(create.date),
+      date: date,
+      date_unix: date.getTime() / 1000,
       duration: create.duration,
       color: create.color,
       description: create.description,
     })
+    .returningAll()
     .executeTakeFirst();
 
-  console.log('***Create By Propmt: ', result);
-
   return {
-    success: !!(result.numInsertedOrUpdatedRows ?? 0n > 0n),
-    id: create.id,
+    success: !!result,
+    event: result,
   };
 }
 
@@ -75,28 +77,21 @@ export async function queryByPrompts(
 
   q = q.limit(query.paginate.limit).offset(query.paginate.offset);
 
-  const result = await q.execute();
-
-  console.log('***Query By Propmt: ', result);
-
-  return result;
+  return await q.execute();
 }
 
 export async function getCalendarEvents(
   db: Kysely<Database>,
-  dateStart?: Date,
-  dateEnd?: Date
+  dateStart?: number,
+  dateEnd?: number
 ) {
-  console.log('***Start Date: ', dateStart);
-  console.log('***End Date: ', dateEnd);
-
   let q = db
     .selectFrom('calendar_events')
     .where('calendar_events.deleted_at', 'is', null)
     .selectAll();
 
-  if (!!dateStart) q = q.where('calendar_events.date', '>', dateStart);
-  if (!!dateEnd) q = q.where('calendar_events.date', '<', dateEnd);
+  if (!!dateStart) q = q.where('calendar_events.date_unix', '>=', dateStart);
+  if (!!dateEnd) q = q.where('calendar_events.date_unix', '<=', dateEnd);
 
   return await q.execute();
 }
@@ -112,6 +107,7 @@ export async function createEvents(
       id,
       name: input.name,
       date: input.date,
+      date_unix: input.dateUnix,
       duration: input.duration,
       color: input.color,
       description: input.description,
@@ -134,6 +130,7 @@ export async function updateEvents(
       id: input.id,
       name: input.name,
       date: input.date,
+      date_unix: input.dateUnix,
       duration: input.duration,
       color: input.color,
       description: input.description,

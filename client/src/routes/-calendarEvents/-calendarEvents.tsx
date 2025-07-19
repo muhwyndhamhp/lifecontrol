@@ -3,14 +3,13 @@ import { useQuery } from '@tanstack/react-query';
 import { client, rpcFetch } from '../../fetcher.ts';
 import { TimeSlot } from './-timeSlot.tsx';
 import { EventSlot } from './-eventSlot.tsx';
-import { useState } from 'react';
 import { CreateEventDialog } from './-createEventDialog.tsx';
+import { useAppStore } from '../../store.ts';
 
 export function CalendarEvents() {
-  const [start, setStart] = useState(new Date());
-  start.setHours(0, 0, 0, 0);
-  const end = new Date(start);
-  end.setDate(end.getDate() + 1);
+  const { start, end } = useAppStore((state) => state.range);
+  const nextDay = useAppStore((state) => state.nextDay);
+  const previousDay = useAppStore((state) => state.previousDay);
 
   const {
     data: events,
@@ -20,8 +19,8 @@ export function CalendarEvents() {
     queryKey: ['calendarEvents', start, end],
     queryFn: rpcFetch(client.api.events.$get)({
       query: {
-        startDate: start.toISOString(),
-        endDate: end.toISOString(),
+        startDate: (start.getTime()  / 1000).toString(),
+        endDate: (end.getTime()  / 1000).toString(),
       },
     }),
   });
@@ -40,21 +39,11 @@ export function CalendarEvents() {
             ]
           </span>
           <span is-="badge" variant-="background0">
-            <span
-              onClick={() =>
-                setStart(new Date(start.setDate(start.getDate() - 1)))
-              }
-              className={spannableButton()}
-            >
+            <span onClick={previousDay} className={spannableButton()}>
               {'<'}
             </span>
             {start.toLocaleDateString('id-ID')}
-            <span
-              onClick={() =>
-                setStart(new Date(start.setDate(start.getDate() + 1)))
-              }
-              className={spannableButton()}
-            >
+            <span onClick={nextDay} className={spannableButton()}>
               {'>'}
             </span>
           </span>

@@ -46,6 +46,7 @@ export const createSchema = object({
   ),
   name: pipe(string()),
   date: string(),
+  dateUnix: number(),
   duration: number(),
   color: fallback(pipe(string(), picklist(Colors)), 'mauve'),
   description: optional(pipe(string())),
@@ -114,4 +115,40 @@ export const internalStructuredSchema = object({
     internalNone,
   ]),
   response: string(),
+});
+
+export const promptEventResponse = object({
+  __typename: literal('Create'),
+  id: string(),
+  name: string(),
+  date: string(),
+  date_unix: number(),
+  duration: number(),
+  color: picklist(Colors),
+  description: optional(string()),
+});
+
+export const promptResponseCreate = object({
+  __typename: literal('Create'),
+  events: array(promptEventResponse),
+});
+
+export const promptResponseQuery = object({
+  __typename: literal('Query'),
+  events: array(promptEventResponse),
+});
+
+export const promptResponseUpdate = object({
+  __typename: literal('Update'),
+  events: array(promptEventResponse),
+});
+
+export const promptStructuredResponseSchema = object({
+  promptResponse: string(),
+  result: union([
+    promptResponseCreate,
+    promptResponseUpdate,
+    promptResponseQuery,
+    object({ __typename: literal('None') }),
+  ]),
 });

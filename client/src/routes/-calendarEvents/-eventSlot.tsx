@@ -41,7 +41,7 @@ export function EventSlot({ events, refetch }: eventSlotProps) {
                   backgroundColor: `var(--${event.color})`,
                 }}
               >
-                {event.name}
+                {event.duration >= 30 ? event.name : ''}
               </div>
 
               <CreateEventDialog

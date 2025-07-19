@@ -2,12 +2,16 @@ import Cerebras from '@cerebras/cerebras_cloud_sdk';
 import { v4 } from 'uuid';
 import { InferOutput, safeParse } from 'valibot';
 import { internalStructuredSchema, StructuredEventJSONSchema } from './types';
+import { Colors } from '../schemas/calendarEvent';
 
 const client = new Cerebras({
   apiKey: '',
 });
 
-export async function OperationFromPrompt(prompt: string) {
+export async function OperationFromPrompt(prompt: string, timeOffset: number) {
+  const date = new Date();
+  date.setHours(date.getUTCHours() - timeOffset);
+
   const schemaCompletion = await client.chat.completions.create({
     stream: false,
     model: 'llama-3.3-70b',
@@ -23,9 +27,10 @@ export async function OperationFromPrompt(prompt: string) {
           - id -> in UUID V4 format
           - name -> text
           - date -> datetime
+          - date_unix -> date but in unix timestamp number instead
           - duration -> number, representing minutes
           - color -> text, representing label color
-          - description -> text, optional
+          - description -> text
           - deleted_at -> optional, populated when event is deleted.
 
         Response indicated the usual response to how you would answer the question. 
@@ -35,16 +40,15 @@ export async function OperationFromPrompt(prompt: string) {
         Operations indicated by virtual property '__typename' and consists of three possible value: 
         Create, Update, Query, and None.
 
-        - If user says something on the similar vein of "please add new schedule to my calendar", 
+        - If user says something on the similar vein of "please add new schedule to my calendar" or "please add ...", 
           then you should return structured output with the __typename of 'Create'.
           You then should populate the fields based on following criteria:
             + id: populate with "${v4()}"
             + name: infer the name that should represent the agenda of the scheduled event
-            + date: infer from what's user expecting, should be populated with ISO Format. 
-                    Current time is "${new Date().toISOString()}". PLEASE ALSO REDUCE THE TIME BY 7 HOURS (say if the stated time is "2025-07-16T12:00:00" then please set it to "2025-07-16T05:00:00" instead.
+            + date: infer from what's user expecting, should be populated with ISO Format. Current time is "${date.toISOString()}". 
             + duration: estimated duration in minutes, if user doesn't specify, default to 60
-            + color: indicates the label color
-            + description: should be more detailed information provided by the user. Should be optional.
+            + color: indicates the label color, values should be one of these: "${Colors.toString()}", if user not specified, choose randomly.
+            + description: should be more detailed information provided by the user. Should not be optional.
 
         - If user says something on a similar vein with "please update my scheduled event...",
           then you should return structured output with the __typename of 'Update'.

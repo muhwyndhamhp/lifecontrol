@@ -69,4 +69,11 @@ const migrations = [
     name: `004_add_description`,
     sql: `alter table "calendar_events" add column "description" text;`,
   },
+  {
+    name: `005_migrate_date_to_unix_timestamp`,
+    sql:`
+      alter table "calendar_events" add column "date_unix" integer not null default 0;
+      update "calendar_events" set date_unix = strftime('%s', date);
+    `
+  }
 ];
