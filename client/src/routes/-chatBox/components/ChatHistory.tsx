@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
-import type { ChatMessage } from '../../useChat.ts';
-import { ChatMessageItem } from './components/chatMessageItem/ChatMessageItem.tsx';
-import { LoadingIndicator } from './components/LoadingIndicator.tsx';
+import type { ChatMessage } from '../useChat.ts';
+import { ChatMessageItem } from './components/ChatMessageItem.tsx';
 
 type ChatHistoryProps = {
   chatHistory: ChatMessage[];
@@ -27,7 +26,18 @@ export function ChatHistory({ chatHistory, loading }: ChatHistoryProps) {
       {chatHistory.map((v, idx) => (
         <ChatMessageItem key={idx} chatMessage={v} index={idx} />
       ))}
-      {loading && <LoadingIndicator />}
+      {loading && (
+        <div
+          style={{
+            padding: '1lh 2ch',
+            backgroundColor: 'var(--background2)',
+          }}
+        >
+          <span>
+            <span is-="spinner" variant-="dots"></span> Working...
+          </span>
+        </div>
+      )}
     </div>
   );
 }

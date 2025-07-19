@@ -1,6 +1,6 @@
 import { css } from '@stitches/react';
-import { ChatHistory } from './components/chatHistory/ChatHistory.tsx';
-import { ChatInput } from './components/chatInput/ChatInput.tsx';
+import { ChatHistory } from './components/ChatHistory.tsx';
+import { ChatInput } from './components/ChatInput.tsx';
 import { useChat } from './useChat.ts';
 
 export function ChatBox() {

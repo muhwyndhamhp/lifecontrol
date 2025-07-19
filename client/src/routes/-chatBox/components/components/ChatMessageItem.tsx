@@ -1,4 +1,4 @@
-import type { ChatMessage } from '../../../../useChat.ts';
+import type { ChatMessage } from '../../useChat.ts';
 import { StructuredResponse } from './components/StructuredResponse.tsx';
 
 type ChatMessageItemProps = {
