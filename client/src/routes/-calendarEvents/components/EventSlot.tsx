@@ -22,6 +22,7 @@ export function EventSlot({ events, refetch }: eventSlotProps) {
           return (
             <>
               <div
+                id={`event-slot-${event.id}`}
                 popoverTarget={`dialog-${event.id}`}
                 key={`event-slot-${event.id}`}
                 onClick={(e) => {

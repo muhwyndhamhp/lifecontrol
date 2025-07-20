@@ -14,6 +14,8 @@ export function StructuredResponse({ event }: StructuredResponseProps) {
     const end = new Date(start);
     end.setDate(start.getDate() + 1);
     setRange({ start, end });
+
+    document.getElementById(`event-slot-${event.id}`)?.scrollIntoView({ behavior: "smooth", block: 'start' })
   };
 
   return (
