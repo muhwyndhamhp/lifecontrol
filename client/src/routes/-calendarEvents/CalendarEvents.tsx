@@ -1,10 +1,10 @@
 import { css } from '@stitches/react';
 import { useQuery } from '@tanstack/react-query';
-import { client, rpcFetch } from '../../fetcher.ts';
+import { client, rpcFetch } from '@lib/fetcher.ts';
 import { TimeSlot } from './components/TimeSlot.tsx';
 import { EventSlot } from './components/EventSlot.tsx';
 import { CreateEventDialog } from './components/CreateEventDialog.tsx';
-import { useAppStore } from '../../store.ts';
+import { useAppStore } from '@lib/store.ts';
 import { useEffect } from 'react';
 
 export function CalendarEvents() {

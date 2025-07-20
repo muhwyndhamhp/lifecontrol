@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import { client } from '../../fetcher.ts';
-import type { CalendarEvent } from '../-calendarEvents/components/EventSlot.tsx';
+import { client } from '@lib/fetcher';
+import type { CalendarEvent } from '@clientTypes/calendarEvent';
 
 export type ChatMessage = {
   message: string;

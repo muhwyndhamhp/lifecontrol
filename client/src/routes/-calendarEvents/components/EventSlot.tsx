@@ -1,10 +1,6 @@
-import type { CalendarEventTable } from '@server/schemas/calendarEvent.ts';
 import { css } from '@stitches/react';
 import { CreateEventDialog } from './CreateEventDialog.tsx';
-
-export type CalendarEvent = Omit<CalendarEventTable, 'date' | 'deleted_at'> & {
-  date: string;
-};
+import type { CalendarEvent } from '@clientTypes/calendarEvent';
 
 export interface eventSlotProps {
   events: CalendarEvent[] | undefined;

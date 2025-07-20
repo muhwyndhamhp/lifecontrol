@@ -6,8 +6,8 @@ import {
 import { css } from '@stitches/react';
 import { type FormEvent, useCallback, useRef } from 'react';
 import { safeParse } from 'valibot';
-import { client } from '../../../fetcher.ts';
-import type { CalendarEvent } from './EventSlot.tsx';
+import { client } from '@lib/fetcher';
+import type { CalendarEvent } from '@clientTypes/calendarEvent';
 import { type ClientResponse } from 'hono/client';
 
 export interface CreateEventDialogProps {
@@ -190,7 +190,7 @@ export function CreateEventDialog({
               contentEditable
               className={inputBox()}
               style={{
-                lineHeight: '3'
+                lineHeight: '3',
               }}
               placeholder={'description'}
               defaultValue={existing?.description}

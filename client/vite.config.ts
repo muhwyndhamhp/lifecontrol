@@ -15,6 +15,8 @@ export default defineConfig({
   resolve: {
     alias: {
       '@server': path.resolve(__dirname, '../server/src'),
+      '@clientTypes': path.resolve(__dirname, './src/types'),
+      '@lib': path.resolve(__dirname, './src/lib'),
     },
   },
 
