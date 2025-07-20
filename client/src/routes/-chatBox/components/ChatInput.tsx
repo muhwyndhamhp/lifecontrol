@@ -15,7 +15,7 @@ export function ChatInput({ onSubmit }: ChatInputProps) {
 
   return (
     <label box-="round" shear-="top">
-      <div style={{ display: 'flex' }}>
+      <div className={chatInputContainer()}>
         <span is-="badge" variant-="background0">
           Chat Input
         </span>
@@ -29,6 +29,10 @@ export function ChatInput({ onSubmit }: ChatInputProps) {
     </label>
   );
 }
+
+const chatInputContainer = css({
+  display: 'flex',
+});
 
 const inputBox = css({
   display: 'flex',

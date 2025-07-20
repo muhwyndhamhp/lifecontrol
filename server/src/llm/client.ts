@@ -53,6 +53,7 @@ export async function OperationFromPrompt(prompt: string, timeOffset: number) {
         - If user says something on a similar vein with "please update my scheduled event...",
           then you should return structured output with the __typename of 'Update'.
           You then should populate the fields based on following criteria:
+            + Current time is "${date.toISOString()}"
             + set: is an array of object that indicates what column should be modified. 
               * column should be in column_name ONLY format
               * value should be in corresponding type and value 
@@ -67,7 +68,9 @@ export async function OperationFromPrompt(prompt: string, timeOffset: number) {
               
         - If user says something on a similar vein with "find me meetings for the next 3 days"
           or other statement that indicates search, then the __typename should be 'Query'.
+            + Current time is "${date.toISOString()}"
             + whereStatements shares the same definition as above;
+            + by default query should be ordered by date_unix unless user stated otherwise, ex. order by calendar_events.date_unix asc.
             + paginate indicates the filtering statement. limit must be between 10 to 100, offset should not less than 0
             + pagination should make assumption on what's the smallest amount of limit we can use to achieve the requested task, for example: "What's next?" should set limit to 1.
         `,

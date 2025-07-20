@@ -69,6 +69,10 @@ export const queryEventSchema = object({
       offset: pipe(number()),
     })
   ),
+  order: object({
+    column: string(),
+    direction: string(),
+  }),
 });
 
 export const noneSchema = object({

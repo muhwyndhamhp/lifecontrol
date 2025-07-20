@@ -1,3 +1,4 @@
+import { css } from '@stitches/react';
 import { useEffect } from 'react';
 import type { ChatMessage } from '../useChat.ts';
 import { ChatMessageItem } from './components/ChatMessageItem.tsx';
@@ -15,24 +16,12 @@ export function ChatHistory({ chatHistory, loading }: ChatHistoryProps) {
   }, [chatHistory]);
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        overflowY: 'scroll',
-        width: '100%',
-      }}
-    >
+    <div className={chatHistoryContainer()}>
       {chatHistory.map((v, idx) => (
         <ChatMessageItem key={idx} chatMessage={v} index={idx} />
       ))}
       {loading && (
-        <div
-          style={{
-            padding: '1lh 2ch',
-            backgroundColor: 'var(--background2)',
-          }}
-        >
+        <div className={loadingIndicator()}>
           <span>
             <span is-="spinner" variant-="dots"></span> Working...
           </span>
@@ -41,3 +30,15 @@ export function ChatHistory({ chatHistory, loading }: ChatHistoryProps) {
     </div>
   );
 }
+
+const chatHistoryContainer = css({
+  display: 'flex',
+  flexDirection: 'column',
+  overflowY: 'scroll',
+  width: '100%',
+});
+
+const loadingIndicator = css({
+  padding: '1lh 2ch',
+  backgroundColor: 'var(--background2)',
+});

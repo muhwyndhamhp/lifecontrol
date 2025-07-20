@@ -86,8 +86,8 @@ export class SqlServer extends DurableObject<Env> {
     return await createByPrompts(this.db, query, offsetHour);
   }
 
-  async updateByPrompts(query: InferOutput<typeof internalUpdateSchema>) {
-    return await updateByPrompts(this.db, query);
+  async updateByPrompts(query: InferOutput<typeof internalUpdateSchema>, offsetHour: number) {
+    return await updateByPrompts(this.db, query, offsetHour);
   }
 }
 

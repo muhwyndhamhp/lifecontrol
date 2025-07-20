@@ -72,6 +72,7 @@ export function useChat() {
         ]);
         break;
       }
+      case 'Query':
       case 'Create':
       case 'Update': {
         setChatHistory((prev) => [

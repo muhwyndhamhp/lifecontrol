@@ -1,4 +1,9 @@
-import { ComparisonOperatorExpression, Kysely, sql } from 'kysely';
+import {
+  ComparisonOperatorExpression,
+  Kysely,
+  OrderByDirection,
+  sql,
+} from 'kysely';
 import { Database } from '../schemas/database';
 import { InferOutput } from 'valibot';
 import {
@@ -12,47 +17,64 @@ import {
   internalUpdateSchema,
 } from '../llm/types';
 
-export async function updateByPrompts(
+function applyWhereFromPrompts(
   db: Kysely<Database>,
-  update: InferOutput<typeof internalUpdateSchema>
+  q: any,
+  whereStatements: InferOutput<typeof internalQuerySchema>['whereStatements']
 ) {
-  let q = db.updateTable('calendar_events');
-
   const { ref } = db.dynamic;
 
-  console.log('*** Update: ', JSON.stringify(update, null, 2));
-  update.set.forEach((v) => {
-    q = q.set(sql`${ref(v.column)}`, sql`${v.value}`);
-  });
-
-  update.whereStatements.forEach((v) => {
-    let query = sql`${ref(v.column)}`;
+  whereStatements.forEach((v) => {
+    const columnRef = ref(v.column);
+    let query = sql`${columnRef}`;
     let value = sql`${v.value}`;
 
     const isLower =
-      ref(v.column).dynamicReference === 'calendar_events.name' ||
-      ref(v.column).dynamicReference === 'calendar_events.description';
+      columnRef.dynamicReference === 'calendar_events.name' ||
+      columnRef.dynamicReference === 'calendar_events.description';
 
-    const isDate = ref(v.column).dynamicReference === 'calendar_events.date';
+    const isDate = columnRef.dynamicReference === 'calendar_events.date';
 
     if (isLower) {
       query = sql`lower(
-      ${ref(v.column)}
+      ${columnRef}
       )`;
     }
 
     if (isDate) {
-      // @formatter:off
       query = sql`${ref('calendar_events.date_unix')}`;
       value = sql`${new Date(v.value).getTime() / 1000}`;
     }
 
     q = q.where(query, v.control as ComparisonOperatorExpression, value);
   });
+  return q;
+}
 
+export async function updateByPrompts(
+  db: Kysely<Database>,
+  update: InferOutput<typeof internalUpdateSchema>,
+  offsetHour: number
+) {
+  let q = db.updateTable('calendar_events');
+
+  const { ref } = db.dynamic;
+
+  update.set.forEach((v) => {
+    if (ref(v.column).dynamicReference === 'date') {
+      const date = new Date(v.value);
+      date.setHours(date.getHours() + offsetHour);
+
+      q = q
+        .set(sql`date`, sql`${date}`)
+        .set(sql`date_unix`, sql`${date.getTime() / 1000}`);
+    } else {
+      q = q.set(sql`${ref(v.column)}`, sql`${v.value}`);
+    }
+  });
+
+  q = applyWhereFromPrompts(db, q, update.whereStatements);
   const result = await q.returningAll().execute();
-
-  console.log('*** Result: ', result);
 
   return {
     success: !!result,
@@ -92,10 +114,15 @@ export async function queryByPrompts(
   db: Kysely<Database>,
   query: InferOutput<typeof internalQuerySchema>
 ) {
+  const { ref } = db.dynamic;
   let q = db.selectFrom('calendar_events').selectAll();
-  query.whereStatements.forEach((v) => {
-    q = q.where(sql`${v.column}`, sql`${v.control}`, sql`${v.value}`);
-  });
+
+  q = applyWhereFromPrompts(db, q, query.whereStatements);
+
+  q = q.orderBy(
+    sql`${ref(query.order.column)}`,
+    query.order.direction as OrderByDirection
+  );
 
   q = q.limit(query.paginate.limit).offset(query.paginate.offset);
 

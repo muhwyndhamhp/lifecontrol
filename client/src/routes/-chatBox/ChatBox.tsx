@@ -9,15 +9,7 @@ export function ChatBox() {
   return (
     <>
       <div className={chatBox()}>
-        <div
-          box-="round"
-          style={{
-            padding: '1lh 1ch',
-            display: 'flex',
-            flexDirection: 'column',
-            height: 'calc(100vh - 7lh)',
-          }}
-        >
+        <div box-="round" className={chatBoxContent()}>
           <ChatHistory chatHistory={chatHistory} loading={loading} />
         </div>
         <ChatInput onSubmit={submitPrompt} />{' '}
@@ -32,4 +24,11 @@ const chatBox = css({
   margin: '0lh 1ch 0lh 0ch',
   display: 'flex',
   flexDirection: 'column',
+});
+
+const chatBoxContent = css({
+  padding: '1lh 1ch',
+  display: 'flex',
+  flexDirection: 'column',
+  height: 'calc(100vh - 7lh)',
 });

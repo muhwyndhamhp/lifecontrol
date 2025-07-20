@@ -1,3 +1,4 @@
+import { css } from '@stitches/react';
 import type { ChatMessage } from '../../useChat.ts';
 import { StructuredResponse } from './components/StructuredResponse.tsx';
 
@@ -10,16 +11,7 @@ export function ChatMessageItem({ chatMessage, index }: ChatMessageItemProps) {
   return (
     <div
       id={`chat-history-${index}`}
-      style={{
-        padding: '1lh 2ch',
-        display: 'flex',
-        flexDirection: 'column',
-        margin: chatMessage.author === 'client' ? '0lh 0ch 0lh auto' : '',
-        backgroundColor:
-          chatMessage.author === 'client'
-            ? 'var(--background0)'
-            : 'var(--background2)',
-      }}
+      className={chatMessageItem(chatMessage.author)}
     >
       <span>{`"${chatMessage.message}"`}</span>
       {chatMessage.structuredResponse?.map((event) => (
@@ -28,3 +20,13 @@ export function ChatMessageItem({ chatMessage, index }: ChatMessageItemProps) {
     </div>
   );
 }
+
+const chatMessageItem = (author: 'client' | 'server') =>
+  css({
+    padding: '1lh 2ch',
+    display: 'flex',
+    flexDirection: 'column',
+    margin: author === 'client' ? '0lh 0ch 0lh auto' : '',
+    backgroundColor:
+      author === 'client' ? 'var(--background0)' : 'var(--background2)',
+  })();

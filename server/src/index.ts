@@ -71,7 +71,7 @@ const apiApp = new Hono<{ Bindings: Env }>()
         } as InferOutput<typeof promptStructuredResponseSchema>);
       }
       case 'Update': {
-        const r = await unwrap(sql.updateByPrompts(res));
+        const r = await unwrap(sql.updateByPrompts(res, data.hourOffset));
         return c.json({
           promptResponse: llmRes.response.response,
           result: {

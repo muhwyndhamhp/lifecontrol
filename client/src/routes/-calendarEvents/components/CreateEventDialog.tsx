@@ -77,7 +77,7 @@ export function CreateEventDialog({
 
       onSubmit();
     },
-    [formRef, existing, dialogRef]
+    [existing, onSubmit]
   );
 
   const deleteEvent = useCallback(
@@ -100,7 +100,7 @@ export function CreateEventDialog({
 
       onSubmit();
     },
-    [dialogRef, existing]
+    [existing?.id, onSubmit]
   );
 
   const dateString = formatDateTimeLocal(
@@ -179,6 +179,23 @@ export function CreateEventDialog({
               ))}
             </div>
           </div>
+          <label box-="round" shear-="top">
+            <div style={{ display: 'flex' }}>
+              <span is-="badge" variant-="background0">
+                Description
+              </span>
+            </div>
+            <textarea
+              name="description"
+              contentEditable
+              className={inputBox()}
+              style={{
+                lineHeight: '3'
+              }}
+              placeholder={'description'}
+              defaultValue={existing?.description}
+            ></textarea>
+          </label>{' '}
           <button
             variant-="mauve"
             onClick={submit}
