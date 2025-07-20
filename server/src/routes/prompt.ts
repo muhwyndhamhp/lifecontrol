@@ -39,7 +39,6 @@ const prompt = new Hono<{ Bindings: Env }>().post(
           __typename: 'Query',
           events: r.map((v) => ({
             ...v,
-            __typename: 'Create',
           })),
         } as InferOutput<typeof promptResponseQuery>;
         break;
@@ -50,7 +49,6 @@ const prompt = new Hono<{ Bindings: Env }>().post(
           __typename: 'Create',
           events: [
             {
-              __typename: 'Create',
               ...r.event,
             },
           ],
@@ -58,12 +56,11 @@ const prompt = new Hono<{ Bindings: Env }>().post(
         break;
       }
       case 'Update': {
-        const r = await unwrap(sql.updateByPrompts(res, data.hourOffset));
+        const r = await unwrap(sql.updateByPrompts(res));
         result = {
           __typename: 'Update',
           events: r.event.map((v) => ({
             ...v,
-            __typename: 'Create',
           })),
         } as InferOutput<typeof promptResponseUpdate>;
         break;

@@ -13,56 +13,41 @@ import {
 } from 'valibot';
 import { Colors } from '../schemas/calendarEvent';
 import { toJsonSchema } from '@valibot/to-json-schema';
-import { validate, version } from 'uuid';
 
 export const Operations = ['Create', 'Update', 'Query', 'None'] as const;
 
-export const updateSchema = object({
-  __typename: picklist(Operations, 'Update'),
+const whereStatementsSchema = {
+  whereStatements: pipe(
+    array(
+      object({
+        column: string(),
+        control: string(),
+        value: string(),
+      })
+    )
+  ),
+};
+
+const createSchemaBase = {
+  name: pipe(string()),
+  date: string(),
+  duration: number(),
+  color: fallback(pipe(string(), picklist(Colors)), 'mauve'),
+  description: optional(pipe(string())),
+};
+
+const updateSchemaBase = {
   set: array(
     object({
       column: string(),
       value: string(),
     })
   ),
-  whereStatements: pipe(
-    array(
-      object({
-        column: string(),
-        control: string(),
-        value: string(),
-      })
-    )
-  ),
-});
+  ...whereStatementsSchema,
+};
 
-export const createSchema = object({
-  __typename: picklist(Operations, 'Create'),
-  id: pipe(
-    string(),
-    custom((value) => {
-      return isUuidV4(value as string);
-    })
-  ),
-  name: pipe(string()),
-  date: string(),
-  dateUnix: number(),
-  duration: number(),
-  color: fallback(pipe(string(), picklist(Colors)), 'mauve'),
-  description: optional(pipe(string())),
-});
-
-export const queryEventSchema = object({
-  __typename: picklist(Operations, 'Query'),
-  whereStatements: pipe(
-    array(
-      object({
-        column: string(),
-        control: string(),
-        value: string(),
-      })
-    )
-  ),
+const querySchemaBase = {
+  ...whereStatementsSchema,
   paginate: pipe(
     object({
       limit: pipe(number()),
@@ -73,6 +58,22 @@ export const queryEventSchema = object({
     column: string(),
     direction: string(),
   }),
+};
+
+// LLM-facing Schemas (for JSON schema generation)
+export const createSchema = object({
+  __typename: picklist(Operations, 'Create'),
+  ...createSchemaBase,
+});
+
+export const updateSchema = object({
+  __typename: picklist(Operations, 'Update'),
+  ...updateSchemaBase,
+});
+
+export const queryEventSchema = object({
+  __typename: picklist(Operations, 'Query'),
+  ...querySchemaBase,
 });
 
 export const noneSchema = object({
@@ -86,28 +87,27 @@ export const structuredEventSchema = object({
 
 const StructuredEventJSON = toJsonSchema(structuredEventSchema, {
   typeMode: 'input',
-  overrideSchema(context) {
-    context.referenceId;
-  },
 });
 
 export const { $schema, ...StructuredEventJSONSchema } = StructuredEventJSON;
 
-const isUuidV4 = (id: string) => validate(id) && version(id) === 4;
-export const internalQuerySchema = object({
-  ...queryEventSchema.entries,
-  __typename: literal('Query'),
-});
+// Internal-facing Schemas (for application logic)
 export const internalCreateSchema = object({
-  ...createSchema.entries,
   __typename: literal('Create'),
+  ...createSchemaBase,
 });
+
 export const internalUpdateSchema = object({
-  ...updateSchema.entries,
   __typename: literal('Update'),
+  ...updateSchemaBase,
 });
+
+export const internalQuerySchema = object({
+  __typename: literal('Query'),
+  ...querySchemaBase,
+});
+
 export const internalNone = object({
-  ...noneSchema.entries,
   __typename: literal('None'),
 });
 
@@ -121,8 +121,8 @@ export const internalStructuredSchema = object({
   response: string(),
 });
 
+// Prompt Response Schemas
 export const promptEventResponse = object({
-  __typename: literal('Create'),
   id: string(),
   name: string(),
   date: string(),
@@ -132,20 +132,17 @@ export const promptEventResponse = object({
   description: optional(string()),
 });
 
-export const promptResponseCreate = object({
-  __typename: literal('Create'),
-  events: array(promptEventResponse),
-});
+const createPromptResponseSchema = <T extends 'Create' | 'Update' | 'Query'>(
+  type: T
+) =>
+  object({
+    __typename: literal(type),
+    events: array(promptEventResponse),
+  });
 
-export const promptResponseQuery = object({
-  __typename: literal('Query'),
-  events: array(promptEventResponse),
-});
-
-export const promptResponseUpdate = object({
-  __typename: literal('Update'),
-  events: array(promptEventResponse),
-});
+export const promptResponseCreate = createPromptResponseSchema('Create');
+export const promptResponseQuery = createPromptResponseSchema('Query');
+export const promptResponseUpdate = createPromptResponseSchema('Update');
 
 export const promptStructuredResponseSchema = object({
   promptResponse: string(),
