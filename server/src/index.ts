@@ -29,7 +29,6 @@ const apiApp = new Hono<{ Bindings: Env }>()
     const data = c.req.valid('json');
     const sql = getSqlFromContext(c);
     const llmRes = await OperationFromPrompt(data.prompt, data.hourOffset);
-    console.log(JSON.stringify(llmRes, null, 2));
 
     if (!llmRes.success) {
       return c.json({
@@ -40,56 +39,54 @@ const apiApp = new Hono<{ Bindings: Env }>()
     }
 
     const res = llmRes.response.operation;
+    let result: InferOutput<typeof promptStructuredResponseSchema>['result'];
 
     switch (res.__typename) {
       case 'Query': {
         const r = await unwrap(sql.queryByPrompts(res));
-        return c.json({
-          promptResponse: llmRes.response.response,
-          result: {
-            __typename: 'Query',
-            events: r.map((v) => ({
-              ...v,
-              __typename: 'Create',
-            })),
-          } as InferOutput<typeof promptResponseQuery>,
-        } as InferOutput<typeof promptStructuredResponseSchema>);
+        result = {
+          __typename: 'Query',
+          events: r.map((v) => ({
+            ...v,
+            __typename: 'Create',
+          })),
+        } as InferOutput<typeof promptResponseQuery>;
+        break;
       }
       case 'Create': {
         const r = await unwrap(sql.createByPrompts(res, data.hourOffset));
-        return c.json({
-          promptResponse: llmRes.response.response,
-          result: {
-            __typename: 'Create',
-            events: [
-              {
-                __typename: 'Create',
-                ...r.event,
-              },
-            ],
-          } as InferOutput<typeof promptResponseCreate>,
-        } as InferOutput<typeof promptStructuredResponseSchema>);
+        result = {
+          __typename: 'Create',
+          events: [
+            {
+              __typename: 'Create',
+              ...r.event,
+            },
+          ],
+        } as InferOutput<typeof promptResponseCreate>;
+        break;
       }
       case 'Update': {
         const r = await unwrap(sql.updateByPrompts(res, data.hourOffset));
-        return c.json({
-          promptResponse: llmRes.response.response,
-          result: {
-            __typename: 'Update',
-            events: r.event.map((v) => ({
-              ...v,
-              __typename: 'Create',
-            })),
-          } as InferOutput<typeof promptResponseUpdate>,
-        } as InferOutput<typeof promptStructuredResponseSchema>);
+        result = {
+          __typename: 'Update',
+          events: r.event.map((v) => ({
+            ...v,
+            __typename: 'Create',
+          })),
+        } as InferOutput<typeof promptResponseUpdate>;
+        break;
       }
       case 'None': {
-        return c.json({
-          promptResponse: llmRes.response.response,
-          result: { __typename: 'None' },
-        } as InferOutput<typeof promptStructuredResponseSchema>);
+        result = { __typename: 'None' };
+        break;
       }
     }
+
+    return c.json({
+      promptResponse: llmRes.response.response,
+      result,
+    } as InferOutput<typeof promptStructuredResponseSchema>);
   })
   .get('/events', vValidator('query', getCalendarEvents), async (c) => {
     const sql = getSqlFromContext(c);
