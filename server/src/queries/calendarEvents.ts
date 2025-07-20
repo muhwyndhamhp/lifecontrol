@@ -48,6 +48,8 @@ function applyWhereFromPrompts(
 
     q = q.where(query, v.control as ComparisonOperatorExpression, value);
   });
+
+
   return q;
 }
 
@@ -123,6 +125,8 @@ export async function queryByPrompts(
     sql`${ref(query.order.column)}`,
     query.order.direction as OrderByDirection
   );
+
+  q = q.where('calendar_events.deleted_at', 'is', null)
 
   q = q.limit(query.paginate.limit).offset(query.paginate.offset);
 
