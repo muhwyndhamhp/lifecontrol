@@ -88,7 +88,11 @@ const app = new Hono<{ Bindings: Env }>()
   .use(
     '*',
     cors({
-      origin: ['http://localhost:5173', 'https://lifecontrol.mwyndham.dev'],
+      origin: [
+        'http://localhost:5173',
+        'https://lifecontrol.mwyndham.dev',
+        'https://hackathon-lifecontrol.mwyndham.dev',
+      ],
       allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     })
   )
