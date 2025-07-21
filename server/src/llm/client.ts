@@ -4,7 +4,7 @@ import { InferOutput, safeParse } from 'valibot';
 import { internalStructuredSchema, StructuredEventJSONSchema } from './types';
 
 const client = new Cerebras({
-  apiKey: '',
+  apiKey: 'csk-3m3tc4h5rmcredvrxtppxd24m3dcj6pvhhc3yn6dp68kyd5f',
 });
 
 export async function OperationFromPrompt(prompt: string) {

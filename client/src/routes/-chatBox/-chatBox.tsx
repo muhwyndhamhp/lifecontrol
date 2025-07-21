@@ -65,6 +65,7 @@ export function ChatBox() {
             onKeyUp={(e) => {
               if (e.key === 'Enter') {
                 submitPrompts(e.currentTarget.value);
+                e.currentTarget.value = ""
               }
             }}
             className={inputBox()}

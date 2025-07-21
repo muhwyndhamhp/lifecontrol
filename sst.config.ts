@@ -17,10 +17,14 @@ export default $config({
         directory: './dist',
       },
       environment: {
-        LOG_LEVEL: 'DEBUG'
+        LOG_LEVEL: 'DEBUG',
       },
       domain:
-        $app.stage === 'production' ? 'lifecontrol.mwyndham.dev' : undefined,
+        $app.stage === 'production'
+          ? 'lifecontrol.mwyndham.dev'
+          : $app.stage === 'hackathon'
+            ? 'hackathon-lifecontrol.mwyndham.dev'
+            : undefined,
       transform: {
         worker: (args) => {
           if (!args.bindings) {
