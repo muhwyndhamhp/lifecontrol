@@ -3,7 +3,7 @@ import type { AppType } from '@server/index.ts';
 
 export const client = hc<AppType>(
   import.meta.env.VITE_APP_STAGE === 'production'
-    ? 'https://lifecontrol.mwyndham.dev'
+    ? 'https://hackathon-lifecontrol.mwyndham.dev'
     : 'http://localhost:5173'
 );
 
