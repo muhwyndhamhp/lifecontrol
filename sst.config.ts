@@ -41,6 +41,12 @@ export default $config({
               className: 'SqlServer',
             },
           ]);
+
+          // args.migrations = {
+          //   oldTag: $app.stage === 'production' ? '' : '',
+          //   newTag: $app.stage === 'production' ? '' : 'v1',
+          //   newSqliteClasses: ["SqlServer"]
+          // }
         },
       },
     });

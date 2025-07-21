@@ -8,7 +8,7 @@ export const Route = createFileRoute('/')({
 
   beforeLoad: async () => {
     const { access, refresh } = getTokens();
-    if (!access && !refresh) throw redirect({ to: '/authorize' });
+    if (!access && !refresh) throw redirect({ to: '/welcome' });
   },
 });
 
@@ -33,3 +33,5 @@ function Index() {
     </div>
   );
 }
+
+

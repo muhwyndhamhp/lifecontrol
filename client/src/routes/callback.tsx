@@ -5,6 +5,7 @@ import { object, parse, string } from 'valibot';
 import type { Challenge } from '@openauthjs/openauth/client';
 import type { InvalidAuthorizationCodeError } from '@openauthjs/openauth/error';
 import { setTokens } from '@lib/cookies';
+import { css } from '@stitches/react';
 
 const CallbackSchema = object({
   code: string(),
@@ -18,7 +19,7 @@ export const Route = createFileRoute('/callback')({
 
 function RouteComponent() {
   const { code } = Route.useSearch();
-  const stage = import.meta.env.VITE_APP_STAGE
+  const stage = import.meta.env.VITE_APP_STAGE;
 
   const [error, setError] = useState<
     InvalidAuthorizationCodeError | undefined
@@ -34,7 +35,7 @@ function RouteComponent() {
 
       const exchanged = await cl.exchange(
         code,
-        `${stage === 'production' ? 'https://lifecontrol.mwyndham.dev' : "http://localhost:5173"}/callback`,
+        `${stage === 'production' ? 'https://lifecontrol.mwyndham.dev' : 'http://localhost:5173'}/callback`,
         challenge?.verifier
       );
       if (exchanged.err) {
@@ -68,15 +69,21 @@ function RouteComponent() {
   }, []);
 
   return (
-    <div className="flex h-full w-full">
+    <div className={welcomeBox()}>
       {error !== undefined ? (
-        <p className="m-auto">
-          {' '}
+        <p style={{ margin: 'auto' }}>
           {`Your identity cannot be validated: ${error}`}{' '}
         </p>
       ) : (
-        <p className="m-auto">Checking your identity...</p>
+        <p style={{ margin: 'auto' }}>Checking your identity...</p>
       )}
     </div>
   );
 }
+
+const welcomeBox = css({
+  display: 'flex',
+  flexDirection: 'column',
+  width: '100%',
+  height: 'calc(100vh - 4lh)',
+});
