@@ -24,7 +24,8 @@
     "paths": {
       "@server/*": ["../server/src/*"],
       "@clientTypes/*": ["./src/types/*"],
-      "@lib/*": ["./src/lib/*"]
+      "@lib/*": ["./src/lib/*"],
+      "@auth/*": ["../auth/*"]
     }
   },
   "include": ["src"]

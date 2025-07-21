@@ -49,6 +49,12 @@ export function useChat() {
     };
   }, [chatHistory]);
 
+  const clearHistory = useCallback(async () => {
+    setChatHistory([]);
+    localStorage.removeItem(CHAT_HISTORY_KEY);
+    location.reload();
+  }, [setChatHistory]);
+
   const submitPrompt = useCallback(async (message: string) => {
     setChatHistory((prev) => {
       setLoading(true);
@@ -89,5 +95,5 @@ export function useChat() {
     setLoading(false);
   }, []);
 
-  return { chatHistory, loading, submitPrompt };
+  return { chatHistory, loading, submitPrompt, clearHistory };
 }

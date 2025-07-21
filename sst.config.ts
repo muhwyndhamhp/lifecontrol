@@ -8,14 +8,17 @@ export default $config({
     };
   },
   async run() {
+    const secrets = [new sst.Secret('IssuerUrl')];
+
     const hono = new sst.cloudflare.Worker('LifeControl', {
       url: true,
+      link: [...secrets],
       handler: './server/src/index.ts',
       assets: {
         directory: './dist',
       },
       environment: {
-        LOG_LEVEL: 'DEBUG'
+        LOG_LEVEL: 'DEBUG',
       },
       domain:
         $app.stage === 'production' ? 'lifecontrol.mwyndham.dev' : undefined,
@@ -38,12 +41,6 @@ export default $config({
               className: 'SqlServer',
             },
           ]);
-
-          // args.migrations = {
-          //   oldTag: $app.stage === "production" ? "" : "",
-          //   newTag: $app.stage === "production" ? "" : "v1",
-          //   newSqliteClasses: ["SqlServer"],
-          // }
         },
       },
     });

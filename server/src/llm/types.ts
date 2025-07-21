@@ -1,7 +1,7 @@
 import {
   array,
-  custom,
   fallback,
+  integer,
   literal,
   number,
   object,
@@ -34,6 +34,7 @@ const createSchemaBase = {
   duration: number(),
   color: fallback(pipe(string(), picklist(Colors)), 'mauve'),
   description: optional(pipe(string())),
+  userId: optional(pipe(number(), integer())),
 };
 
 const updateSchemaBase = {
@@ -130,6 +131,7 @@ export const promptEventResponse = object({
   duration: number(),
   color: picklist(Colors),
   description: optional(string()),
+  user_id: optional(number()),
 });
 
 const createPromptResponseSchema = <T extends 'Create' | 'Update' | 'Query'>(

@@ -1,14 +1,7 @@
-import {
-  Colors,
-  createCalendarEventSchema,
-  updateCalendarEventSchema,
-} from '@server/schemas/calendarEvent.ts';
+import { Colors } from '@server/schemas/calendarEvent.ts';
 import { css } from '@stitches/react';
-import { type FormEvent, useCallback, useRef } from 'react';
-import { safeParse } from 'valibot';
-import { client } from '@lib/fetcher';
 import type { CalendarEvent } from '@clientTypes/calendarEvent';
-import { type ClientResponse } from 'hono/client';
+import { useEventDialog } from './useEventDialog';
 
 export interface CreateEventDialogProps {
   existing?: CalendarEvent;
@@ -21,91 +14,8 @@ export function CreateEventDialog({
   existing,
   idSuffix,
 }: CreateEventDialogProps) {
-  const formRef = useRef<HTMLFormElement>(null);
-  const dialogRef = useRef<HTMLDialogElement>(null);
-
-  const submit = useCallback(
-    async (e: FormEvent) => {
-      e.preventDefault();
-      const form = formRef.current;
-      if (!form) {
-        return;
-      }
-
-      const formData = new FormData(form);
-      const values = Object.fromEntries(formData.entries());
-
-      let fetch: Promise<ClientResponse<{ success: boolean }>> | undefined =
-        undefined;
-
-      if (!existing) {
-        const parsed = safeParse(createCalendarEventSchema, {
-          ...values,
-          dateUnix: new Date(values['date'] as string).getTime() / 1000,
-        });
-
-        if (!parsed.success) {
-          return;
-        }
-
-        fetch = client.api.events.create.$post({
-          json: parsed.output,
-        });
-      } else {
-        const parsed = safeParse(updateCalendarEventSchema, {
-          ...values,
-          id: existing.id,
-          dateUnix: new Date(values['date'] as string).getTime() / 1000,
-        });
-
-        if (!parsed.success) {
-          return;
-        }
-
-        fetch = client.api.events.update.$post({
-          json: parsed.output,
-        });
-      }
-
-      const blob: ClientResponse<{ success: boolean }> = await fetch;
-      const res = (await blob.json()) as { success: boolean };
-      if (!res.success) {
-        console.log('Create event not successful');
-      }
-
-      dialogRef.current?.togglePopover();
-
-      onSubmit();
-    },
-    [existing, onSubmit]
-  );
-
-  const deleteEvent = useCallback(
-    async (e: FormEvent) => {
-      e.preventDefault();
-
-      const blob = await client.api.events[':id'].$delete({
-        param: {
-          id: existing?.id ?? '',
-        },
-      });
-
-      const res = await blob.json();
-
-      if (!res.success) {
-        console.log('Delete event not successful');
-      }
-
-      dialogRef.current?.togglePopover();
-
-      onSubmit();
-    },
-    [existing?.id, onSubmit]
-  );
-
-  const dateString = formatDateTimeLocal(
-    existing ? new Date(existing?.date) : new Date()
-  );
+  const { deleteEvent, dateString, submit, formRef, dialogRef } =
+    useEventDialog(existing);
 
   return (
     <dialog
@@ -189,16 +99,16 @@ export function CreateEventDialog({
               name="description"
               contentEditable
               className={inputBox()}
-              style={{
-                lineHeight: '3',
-              }}
               placeholder={'description'}
               defaultValue={existing?.description}
             ></textarea>
           </label>{' '}
           <button
             variant-="mauve"
-            onClick={submit}
+            onClick={(e) => {
+              submit(e);
+              onSubmit();
+            }}
             type="submit"
             style={{ width: 'calc(100% - 1ch)', margin: '0lh auto' }}
           >
@@ -209,7 +119,10 @@ export function CreateEventDialog({
               variant-="red"
               box-="round"
               type="submit"
-              onClick={deleteEvent}
+              onClick={(e) => {
+                deleteEvent(e);
+                onSubmit();
+              }}
             >
               Delete
             </button>
@@ -218,18 +131,6 @@ export function CreateEventDialog({
       </form>
     </dialog>
   );
-}
-
-function formatDateTimeLocal(date: Date): string {
-  const pad = (n: number) => n.toString().padStart(2, '0');
-
-  const year = date.getFullYear();
-  const month = pad(date.getMonth() + 1);
-  const day = pad(date.getDate());
-  const hours = pad(date.getHours());
-  const minutes = pad(date.getMinutes());
-
-  return `${year}-${month}-${day}T${hours}:${minutes}`;
 }
 
 const content = css({

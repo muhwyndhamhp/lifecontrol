@@ -11,7 +11,7 @@ import {
   updateByPrompts,
   updateEvents,
 } from './queries/calendarEvents';
-import { Database } from './schemas/database';
+import { Database, ValidationCache } from './schemas/database';
 import { InferOutput } from 'valibot';
 import {
   createCalendarEventSchema,
@@ -23,6 +23,7 @@ import {
   internalQuerySchema,
   internalUpdateSchema,
 } from './llm/types';
+import { ContextfulUserFromToken, UserFromToken } from './middlewares/types';
 
 export interface Env {
   ASSETS: Fetcher;
@@ -58,8 +59,12 @@ export class SqlServer extends DurableObject<Env> {
     });
   }
 
-  async getCalendarEvents(dateStart?: number, dateEnd?: number) {
-    return await getCalendarEvents(this.db, dateStart, dateEnd);
+  async getCalendarEvents(
+    userId: number,
+    dateStart?: number,
+    dateEnd?: number
+  ) {
+    return await getCalendarEvents(this.db, userId, dateStart, dateEnd);
   }
 
   async createCalendarEvents(
@@ -74,24 +79,97 @@ export class SqlServer extends DurableObject<Env> {
     return await updateEvents(this.db, input);
   }
 
-  async deleteCalendarEvent(id: string) {
-    return await deleteEvent(this.db, id);
+  async deleteCalendarEvent(userId: number, id: string) {
+    return await deleteEvent(this.db, userId, id);
   }
 
-  async queryByPrompts(query: InferOutput<typeof internalQuerySchema>) {
-    return await queryByPrompts(this.db, query);
+  async queryByPrompts(
+    userId: number,
+    query: InferOutput<typeof internalQuerySchema>
+  ) {
+    return await queryByPrompts(this.db, userId, query);
   }
 
-  async createByPrompts(query: InferOutput<typeof internalCreateSchema>, offsetHour: number) {
-    return await createByPrompts(this.db, query, offsetHour);
+  async createByPrompts(
+    userId: number,
+    query: InferOutput<typeof internalCreateSchema>,
+    offsetHour: number
+  ) {
+    return await createByPrompts(this.db, userId, query, offsetHour);
   }
 
-  async updateByPrompts(query: InferOutput<typeof internalUpdateSchema>, offsetHour: number) {
-    return await updateByPrompts(this.db, query, offsetHour);
+  async updateByPrompts(
+    userId: number,
+    query: InferOutput<typeof internalUpdateSchema>,
+    offsetHour: number
+  ) {
+    return await updateByPrompts(this.db, userId, query, offsetHour);
+  }
+
+  async cacheVerified(access: string, refresh: string, user: UserFromToken) {
+    const expiryDate = new Date();
+    expiryDate.setHours(expiryDate.getHours() + 2);
+
+    this.ctx.storage.sql.exec(
+      `insert into "validation_cache" 
+      (access, refresh, user_id, oauth_id, email, expiry_timestamp) 
+      values(
+        "${access}", 
+        "${refresh}", 
+        ${parseInt(user.properties.userID)}, 
+        "${user.properties.oauthID}", 
+        "${user.properties.email}", 
+        ${expiryDate.getTime() / 1000}
+      )`
+    );
+
+    await this.ctx.storage.setAlarm(expiryDate);
+  }
+
+  async alarm() {
+    this.ctx.storage.sql.exec<ValidationCache>(
+      `delete from "validation_cache" where expiry_timestamp <= ${new Date().getTime() / 1000}`
+    );
+  }
+
+  async getVerified(access: string) {
+    const res = this.ctx.storage.sql
+      .exec<ValidationCache>(
+        `select * from "validation_cache" where access = "${access}" limit 1`
+      )
+      .toArray();
+
+    if (!res || res.length === 0) {
+      return {
+        access: '',
+        refresh: '',
+      } as ContextfulUserFromToken;
+    }
+
+    return {
+      access: res[0].access,
+      refresh: res[0].refresh,
+      user: {
+        type: 'user',
+        properties: {
+          userID: res[0].user_id.toString(),
+          oauthID: res[0].oauth_id,
+          email: res[0].email,
+        },
+      },
+    } as ContextfulUserFromToken;
   }
 }
 
-export function getSqlFromContext(c: Context<{ Bindings: Env }>) {
+export function getSqlFromContext(
+  c: Context<
+    { Bindings: Env } & {
+      Variables: {
+        user: UserFromToken;
+      };
+    }
+  >
+) {
   const id = c.env.SQL_SERVER.idFromName('default');
   return c.env.SQL_SERVER.get(id);
 }

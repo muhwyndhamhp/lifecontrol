@@ -1,9 +1,15 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, redirect } from '@tanstack/react-router';
 import { CalendarEvents } from './-calendarEvents/CalendarEvents.tsx';
 import { ChatBox } from './-chatBox/ChatBox.tsx';
+import { getTokens } from '@lib/cookies.ts';
 
 export const Route = createFileRoute('/')({
   component: Index,
+
+  beforeLoad: async () => {
+    const { access, refresh } = getTokens();
+    if (!access && !refresh) throw redirect({ to: '/authorize' });
+  },
 });
 
 function Index() {

@@ -35,7 +35,7 @@ export function StructuredResponse({ event }: StructuredResponseProps) {
       onClick={handleClick}
       style={{
         padding: '1lh 1ch',
-        margin: '1lh 2ch',
+        margin: '0.5lh 2ch',
         maxWidth: '37ch',
         backgroundColor: `var(--${event?.color})`,
         color: `var(--background0)`,

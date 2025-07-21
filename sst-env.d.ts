@@ -6,6 +6,10 @@
 import "sst"
 declare module "sst" {
   export interface Resource {
+    "IssuerUrl": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
   }
 }
 // cloudflare 

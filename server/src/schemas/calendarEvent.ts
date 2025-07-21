@@ -1,6 +1,7 @@
 import {
   custom,
   fallback,
+  integer,
   maxValue,
   minValue,
   number,
@@ -44,6 +45,7 @@ export const createCalendarEventSchema = object({
   ]),
   color: fallback(pipe(string(), picklist(Colors)), 'mauve'),
   description: optional(pipe(string())),
+  userId: optional(pipe(number(), integer())),
 });
 
 export const updateCalendarEventSchema = object({
@@ -82,4 +84,5 @@ export interface CalendarEventTable {
   color: (typeof Colors)[number];
   deleted_at?: Date;
   description?: string;
+  user_id?: number;
 }

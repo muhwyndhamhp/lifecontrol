@@ -4,6 +4,7 @@ import { Env } from './env';
 import { handleAssets } from './assets';
 import events from './routes/events';
 import prompt from './routes/prompt';
+import { authMiddleware } from './middlewares/auth';
 
 const apiApp = new Hono<{ Bindings: Env }>()
   .route('/events', events)
@@ -17,6 +18,7 @@ const app = new Hono<{ Bindings: Env }>()
       allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     })
   )
+  .use('/api/*', authMiddleware)
   .route('/api', apiApp)
   .get('*', handleAssets);
 

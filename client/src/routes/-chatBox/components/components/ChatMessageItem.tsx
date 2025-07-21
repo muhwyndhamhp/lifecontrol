@@ -13,13 +13,17 @@ export function ChatMessageItem({ chatMessage, index }: ChatMessageItemProps) {
       id={`chat-history-${index}`}
       className={chatMessageItem(chatMessage.author)}
     >
-      <span>{`"${chatMessage.message}"`}</span>
+      <span className={chatMessageText()}>{`"${chatMessage.message}"`}</span>
       {chatMessage.structuredResponse?.map((event) => (
         <StructuredResponse key={event.id} event={event} />
       ))}
     </div>
   );
 }
+
+const chatMessageText = css({
+  margin: '0lh 0ch 0.5lh 0ch'
+})
 
 const chatMessageItem = (author: 'client' | 'server') =>
   css({
@@ -28,5 +32,5 @@ const chatMessageItem = (author: 'client' | 'server') =>
     flexDirection: 'column',
     margin: author === 'client' ? '0lh 0ch 0lh auto' : '',
     backgroundColor:
-      author === 'client' ? 'var(--background0)' : 'var(--background2)',
+      author === 'client' ? 'var(--background0)' : 'var(--background1)',
   })();

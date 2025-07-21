@@ -71,9 +71,47 @@ const migrations = [
   },
   {
     name: `005_migrate_date_to_unix_timestamp`,
-    sql:`
+    sql: `
       alter table "calendar_events" add column "date_unix" integer not null default 0;
       update "calendar_events" set date_unix = strftime('%s', date);
-    `
-  }
+    `,
+  },
+  {
+    name: `006_add_user_table`,
+    sql: `
+    create table if not exists "calendar_users" (
+      id integer primary key autoincrement,
+      name text not null,
+      email text not null,
+      githubOauthId text,
+      googleOauthId text
+    )
+    `,
+  },
+  {
+    name: `007_drop_user_table`,
+    sql: `
+    drop table if exists "calendar_users";
+    `,
+  },
+  {
+    name: `008_add_user_id`,
+    sql: `
+    alter table "calendar_events" add column "user_id" integer;
+    update "calendar_events" set user_id = 1;
+    `,
+  },
+  {
+    name: `009_add_validation_cache`,
+    sql: `
+    create table if not exists "validation_cache" (
+      access text not null primary key,
+      refresh text,
+      user_id integer not null,
+      oauth_id text not null,
+      email text not null,
+      expiry_timestamp integer not null
+    )
+    `,
+  },
 ];

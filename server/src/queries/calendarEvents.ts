@@ -49,12 +49,12 @@ function applyWhereFromPrompts(
     q = q.where(query, v.control as ComparisonOperatorExpression, value);
   });
 
-
   return q;
 }
 
 export async function updateByPrompts(
   db: Kysely<Database>,
+  userId: number,
   update: InferOutput<typeof internalUpdateSchema>,
   offsetHour: number
 ) {
@@ -63,6 +63,10 @@ export async function updateByPrompts(
   const { ref } = db.dynamic;
 
   update.set.forEach((v) => {
+    if (ref(v.column).dynamicReference === 'user_id') {
+      return
+    }
+
     if (ref(v.column).dynamicReference === 'date') {
       const date = new Date(v.value);
       date.setHours(date.getHours() + offsetHour);
@@ -76,6 +80,8 @@ export async function updateByPrompts(
   });
 
   q = applyWhereFromPrompts(db, q, update.whereStatements);
+  q = q.where('calendar_events.user_id', '=', userId)
+
   const result = await q.returningAll().execute();
 
   return {
@@ -86,6 +92,7 @@ export async function updateByPrompts(
 
 export async function createByPrompts(
   db: Kysely<Database>,
+  userId: number,
   create: InferOutput<typeof internalCreateSchema>,
   offsetHour: number
 ) {
@@ -102,6 +109,7 @@ export async function createByPrompts(
       duration: create.duration,
       color: create.color,
       description: create.description,
+      user_id: userId,
     })
     .returningAll()
     .executeTakeFirst();
@@ -114,6 +122,7 @@ export async function createByPrompts(
 
 export async function queryByPrompts(
   db: Kysely<Database>,
+  userId: number,
   query: InferOutput<typeof internalQuerySchema>
 ) {
   const { ref } = db.dynamic;
@@ -126,8 +135,8 @@ export async function queryByPrompts(
     query.order.direction as OrderByDirection
   );
 
-  q = q.where('calendar_events.deleted_at', 'is', null)
-
+  q = q.where('calendar_events.deleted_at', 'is', null);
+  q = q.where('calendar_events.user_id', '=', userId)
   q = q.limit(query.paginate.limit).offset(query.paginate.offset);
 
   return await q.execute();
@@ -135,12 +144,14 @@ export async function queryByPrompts(
 
 export async function getCalendarEvents(
   db: Kysely<Database>,
+  userId: number,
   dateStart?: number,
   dateEnd?: number
 ) {
   let q = db
     .selectFrom('calendar_events')
     .where('calendar_events.deleted_at', 'is', null)
+    .where('calendar_events.user_id', '=', userId)
     .selectAll();
 
   if (!!dateStart) q = q.where('calendar_events.date_unix', '>=', dateStart);
@@ -164,6 +175,7 @@ export async function createEvents(
       duration: input.duration,
       color: input.color,
       description: input.description,
+      user_id: input.userId,
     })
     .executeTakeFirst();
 
@@ -187,8 +199,10 @@ export async function updateEvents(
       duration: input.duration,
       color: input.color,
       description: input.description,
+      user_id: input.userId,
     })
     .where('calendar_events.id', '=', input.id)
+    .where('calendar_events.user_id', '=', input.userId ?? 0)
     .executeTakeFirst();
 
   return {
@@ -197,10 +211,15 @@ export async function updateEvents(
   };
 }
 
-export async function deleteEvent(db: Kysely<Database>, id: string) {
+export async function deleteEvent(
+  db: Kysely<Database>,
+  userId: number,
+  id: string
+) {
   const result = await db
     .deleteFrom('calendar_events')
     .where('calendar_events.id', '=', id)
+    .where('calendar_events.user_id', '=', userId)
     .executeTakeFirst();
 
   return {
