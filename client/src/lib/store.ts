@@ -7,7 +7,7 @@ type RefetchCalendarState = {
     itemId?: string;
   };
   refetch: boolean;
-  setRange: (range?: { start: Date; end: Date, itemId?: string }) => void;
+  setRange: (range?: { start: Date; end: Date; itemId?: string }) => void;
   nextDay: () => void;
   previousDay: () => void;
   toggleRefetch: () => void;
@@ -55,6 +55,21 @@ export const refetchCalendar: StateCreator<RefetchCalendarState> = (
   };
 };
 
-export const useAppStore = create<RefetchCalendarState>()((...a) => ({
-  ...refetchCalendar(...a),
-}));
+type GlobalKeyboardState = {
+  keys: string[];
+  setKeys: (keys: string[]) => void;
+};
+
+export const globalKeyboard: StateCreator<GlobalKeyboardState> = (set) => ({
+  keys: [],
+  setKeys: (keys: string[]) => {
+    set({ keys });
+  },
+});
+
+export const useAppStore = create<RefetchCalendarState & GlobalKeyboardState>()(
+  (...a) => ({
+    ...refetchCalendar(...a),
+    ...globalKeyboard(...a),
+  })
+);

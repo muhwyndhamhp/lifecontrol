@@ -12,8 +12,8 @@ export const authMiddleware = createMiddleware<
     };
   }
 >(async (c, next) => {
-  const accessToken = getCookie(c, 'access_token')?.trim();
-  const refreshToken = getCookie(c, 'refresh_token')?.trim();
+  let accessToken = getCookie(c, 'access_token')?.trim();
+  let refreshToken = getCookie(c, 'refresh_token')?.trim();
   const sql = getSqlFromContext(c);
 
   if (!accessToken && !refreshToken) {
@@ -22,43 +22,32 @@ export const authMiddleware = createMiddleware<
 
   const existingSubject = await unwrap(sql.getVerified(accessToken ?? ''));
 
-  if (existingSubject.user) {
-    console.log(`***Existing User: ${JSON.stringify(existingSubject)}`);
-
-    c.set('user', existingSubject.user);
-
-    await next();
-  } else {
+  if (!existingSubject.user) {
     const cl = authClient(Resource.IssuerUrl.value);
     const verified = await cl.verify(subjects, accessToken ?? '', {
       refresh: refreshToken ?? '',
     });
 
     if (verified.err) {
-      console.log('Error During Verifying: ', verified.err.message);
-
       return c.redirect('/authorize');
     }
 
     if (verified.tokens?.access && accessToken !== verified.tokens?.access) {
-      sql.cacheVerified(
-        verified.tokens?.access ?? '',
-        verified.tokens?.refresh,
-        verified.subject
-      );
-
-      setCookie(c, 'access_token', verified.tokens?.access ?? '');
-      setCookie(c, 'refresh_token', verified.tokens?.refresh ?? '');
-    } else {
-      sql.cacheVerified(
-        accessToken ?? '',
-        refreshToken ?? '',
-        verified.subject
-      );
+      accessToken = verified.tokens?.access ?? accessToken;
+      refreshToken = verified.tokens?.refresh ?? refreshToken;
     }
 
-    c.set('user', verified.subject);
+    sql.cacheVerified(accessToken ?? '', refreshToken ?? '', verified.subject);
 
-    await next();
+    setCookie(c, 'access_token', verified.tokens?.access ?? '');
+    setCookie(c, 'refresh_token', verified.tokens?.refresh ?? '');
+
+    c.set('user', verified.subject);
   }
+
+  if (existingSubject.user) {
+    c.set('user', existingSubject.user);
+  }
+
+  await next();
 });

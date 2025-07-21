@@ -1,23 +1,27 @@
 import { createRootRoute, Outlet } from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 import { css } from '@stitches/react';
+import { useKeyboard } from './-hooks/useKeyboard.ts';
 
 export const Route = createRootRoute({
-  component: () => (
-    <div className={root()}>
-      <div shear-={'top'} box-={'round'} className={box()}>
-        <div className={header()}>
-          <span is-="badge" variant-="flamingo" cap-={'square triangle'}>
-            Life Control{' >>'}
-          </span>
-        </div>
-        <div>
-          <Outlet />
-          <TanStackRouterDevtools />
+  component: () => {
+    useKeyboard();
+    return (
+      <div className={root()}>
+        <div shear-={'top'} box-={'round'} className={box()}>
+          <div className={header()}>
+            <span is-="badge" variant-="flamingo" cap-={'square triangle'}>
+              Life Control{' >>'}
+            </span>
+          </div>
+          <div>
+            <Outlet />
+            <TanStackRouterDevtools />
+          </div>
         </div>
       </div>
-    </div>
-  ),
+    );
+  },
 });
 
 const box = css({
