@@ -3,9 +3,10 @@ import { v4 } from 'uuid';
 import { InferOutput, safeParse } from 'valibot';
 import { internalStructuredSchema, StructuredEventJSONSchema } from './types';
 import { Colors } from '../schemas/calendarEvent';
+import { Resource } from 'sst';
 
 const client = new Cerebras({
-  apiKey: '',
+  apiKey: Resource.CerebrasSecret.value,
 });
 
 export async function OperationFromPrompt(userId: number, prompt: string, timeOffset: number) {

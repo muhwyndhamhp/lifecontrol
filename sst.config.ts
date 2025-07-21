@@ -8,7 +8,7 @@ export default $config({
     };
   },
   async run() {
-    const secrets = [new sst.Secret('IssuerUrl')];
+    const secrets = [new sst.Secret('IssuerUrl'), new sst.Secret('CerebrasSecret')];
 
     const hono = new sst.cloudflare.Worker('LifeControl', {
       url: true,
