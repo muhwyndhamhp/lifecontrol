@@ -6,9 +6,6 @@ type StructuredResponseProps = {
 };
 
 export function StructuredResponse({ event }: StructuredResponseProps) {
-  const { start: existingStart, end: existingEnd } = useAppStore(
-    (state) => state.range
-  );
   const setRange = useAppStore((state) => state.setRange);
 
   const handleClick = () => {
@@ -17,16 +14,7 @@ export function StructuredResponse({ event }: StructuredResponseProps) {
     const end = new Date(start);
     end.setDate(start.getDate() + 1);
 
-    if (
-      start.toISOString() != existingStart.toISOString() &&
-      end.toISOString() != existingEnd.toISOString()
-    ) {
-      setRange({ start, end });
-    }
-
-    document
-      .getElementById(`event-slot-${event.id}`)
-      ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setRange({ start, end, itemId: `event-slot-${event.id}` });
   };
 
   return (

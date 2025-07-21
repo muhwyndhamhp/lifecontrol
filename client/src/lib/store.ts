@@ -4,9 +4,10 @@ type RefetchCalendarState = {
   range: {
     start: Date;
     end: Date;
+    itemId?: string;
   };
   refetch: boolean;
-  setRange: (range?: { start: Date; end: Date }) => void;
+  setRange: (range?: { start: Date; end: Date, itemId?: string }) => void;
   nextDay: () => void;
   previousDay: () => void;
   toggleRefetch: () => void;

@@ -6,9 +6,10 @@ import { EventSlot } from './components/EventSlot.tsx';
 import { CreateEventDialog } from './components/CreateEventDialog.tsx';
 import { useAppStore } from '@lib/store.ts';
 import { useEffect } from 'react';
+import { delay } from '@lib/toolbox.ts';
 
 export function CalendarEvents() {
-  const { start, end } = useAppStore((state) => state.range);
+  const { start, end, itemId } = useAppStore((state) => state.range);
   const refetch = useAppStore((state) => state.refetch);
   const toggleRefetch = useAppStore((state) => state.toggleRefetch);
   const nextDay = useAppStore((state) => state.nextDay);
@@ -34,10 +35,16 @@ export function CalendarEvents() {
         await refetching();
         toggleRefetch();
       }
+
+      if (itemId) {
+        document
+          .getElementById(itemId)
+          ?.scrollIntoView({ behavior: 'auto', block: 'start' });
+      }
     };
 
     a();
-  }, [refetch, refetching, toggleRefetch]);
+  }, [refetch, refetching, toggleRefetch, itemId]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { client } from '@lib/fetcher';
 import type { CalendarEvent } from '@clientTypes/calendarEvent';
+import { useAppStore } from '@lib/store';
 
 export type ChatMessage = {
   message: string;
@@ -33,6 +34,8 @@ const loadChatHistory = (): ChatMessage[] => {
 };
 
 export function useChat() {
+  const setRange = useAppStore((state) => state.setRange);
+
   const [chatHistory, setChatHistory] =
     useState<ChatMessage[]>(loadChatHistory());
   const [loading, setLoading] = useState(false);
@@ -78,7 +81,19 @@ export function useChat() {
         ]);
         break;
       }
-      case 'Query':
+      case 'Query': {
+        setChatHistory((prev) => [
+          ...prev,
+          {
+            message: json.promptResponse,
+            author: 'server',
+            structuredResponse: resJson.events as CalendarEvent[],
+          },
+        ]);
+
+        break;
+      }
+
       case 'Create':
       case 'Update': {
         setChatHistory((prev) => [
@@ -89,6 +104,16 @@ export function useChat() {
             structuredResponse: resJson.events as CalendarEvent[],
           },
         ]);
+
+        if (resJson.events.length > 0) {
+          const firstEvent = resJson.events[0];
+          const start = new Date(firstEvent.date_unix * 1000);
+          start.setHours(0, 0, 0, 0);
+          const end = new Date(start);
+          end.setDate(end.getDate() + 1);
+
+          setRange({ start, end, itemId: `event-slot-${firstEvent.id}` });
+        }
         break;
       }
     }
