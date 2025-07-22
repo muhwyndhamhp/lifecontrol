@@ -1,7 +1,6 @@
 import { createMiddleware } from 'hono/factory';
 import { getCookie, setCookie } from 'hono/cookie';
 import { authClient, subjects } from '../../../auth/client';
-import { Resource } from 'sst';
 import { UserFromToken } from './types';
 import { Env, getSqlFromContext, unwrap } from '../env';
 
@@ -12,7 +11,6 @@ export const authMiddleware = createMiddleware<
     };
   }
 >(async (c, next) => {
-  console.log('*** Enter middleware');
   let accessToken = getCookie(c, 'access_token')?.trim();
   let refreshToken = getCookie(c, 'refresh_token')?.trim();
   const sql = getSqlFromContext(c);

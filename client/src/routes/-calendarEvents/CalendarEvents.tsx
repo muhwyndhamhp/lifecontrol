@@ -68,7 +68,7 @@ export function CalendarEvents() {
       if (itemId) {
         document
           .getElementById(itemId)
-          ?.scrollIntoView({ behavior: 'auto', block: 'start' });
+          ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     };
 

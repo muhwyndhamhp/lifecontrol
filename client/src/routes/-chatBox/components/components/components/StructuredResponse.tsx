@@ -17,6 +17,8 @@ export function StructuredResponse({ event }: StructuredResponseProps) {
     setRange({ start, end, itemId: `event-slot-${event.id}` });
   };
 
+  const date = new Date(event.date);
+
   return (
     <div
       key={`structured-response-${event.id}`}
@@ -34,10 +36,10 @@ export function StructuredResponse({ event }: StructuredResponseProps) {
         {event?.name}
       </p>
       <p style={{ margin: '1lh 1ch 0lh 1ch', color: `var(--background3)` }}>
-        {`Scheduled at ${new Date(event?.date).toISOString().slice(0, 16)},`}
+        {`${date.toLocaleDateString()}, ${date.toLocaleTimeString()}`}
       </p>
       <p style={{ margin: '0lh 1ch', color: `var(--background3)` }}>
-        {`for ${event?.duration} minutes`}
+        {`For ${event?.duration} minutes`}
       </p>
       <p style={{ margin: '1lh 1ch 0lh 1ch', color: `var(--background3)` }}>
         Description:

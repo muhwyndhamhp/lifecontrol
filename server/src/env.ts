@@ -28,8 +28,8 @@ import { ContextfulUserFromToken, UserFromToken } from './middlewares/types';
 export interface Env {
   ASSETS: Fetcher;
   SQL_SERVER: DurableObjectNamespace<SqlServer>;
-  ISSUER_URL: SecretsStoreSecret,
-  CEREBRAS_SECRET: SecretsStoreSecret
+  ISSUER_URL: SecretsStoreSecret;
+  CEREBRAS_SECRET: SecretsStoreSecret;
 }
 
 export class SqlServer extends DurableObject<Env> {
@@ -41,24 +41,31 @@ export class SqlServer extends DurableObject<Env> {
     migrate(this.ctx.storage.sql);
 
     this.ctx.storage.sql.exec<ValidationCache>(
-      `delete from "validation_cache" where expiry_timestamp <= ${new Date().getTime() / 1000}`
+      `
+      delete 
+        from "validation_cache" 
+      where 
+        expiry_timestamp <= ${new Date().getTime() / 1000}`
     );
 
     this.db = new Kysely<Database>({
       dialect: new DODialect({ ctx }),
       log(event: LogEvent) {
+        const { sql, parameters } = event.query;
+        const duration = event.queryDurationMillis;
+
         if (event.level === 'query') {
           console.log('--- Kysely Query ---');
-          console.log('SQL:', event.query.sql);
-          console.log('Parameters:', event.query.parameters);
-          console.log('Duration (ms):', event.queryDurationMillis);
+          console.log(`SQL: ${sql}`);
+          console.log(`Parameters: ${JSON.stringify(parameters)}`);
+          console.log(`Duration (ms): ${duration}`);
           console.log('--------------------');
         } else if (event.level === 'error') {
           console.error('--- Kysely Error ---');
-          console.error('SQL:', event.query.sql);
-          console.error('Parameters:', event.query.parameters);
-          console.error('Error:', event.error);
-          console.error('Duration (ms):', event.queryDurationMillis);
+          console.error(`SQL: ${sql}`);
+          console.error(`Parameters: ${JSON.stringify(parameters)}`);
+          console.error(`Error: ${event.error}`);
+          console.error(`Duration (ms): ${duration}`);
           console.error('--------------------');
         }
       },

@@ -17,12 +17,9 @@ const events = new Hono<
   }
 >()
   .get('/', vValidator('query', getCalendarEvents), async (c) => {
-    console.log('*** Onto Handler');
-
     const sql = getSqlFromContext(c);
     const user = c.get('user');
 
-    console.log(`***User Data; ${JSON.stringify(user)}`);
     const userId = parseInt(user.properties.userID);
 
     const data = c.req.valid('query');
