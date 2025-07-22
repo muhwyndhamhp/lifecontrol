@@ -1,33 +1,10 @@
+import { getHourIntervals } from '@lib/toolbox';
 import { css } from '@stitches/react';
-import { Fragment, useEffect, useRef } from 'react';
+import { Fragment, useRef } from 'react';
 
 export function TimeSlot() {
-  const intervals: { label: string; isHour: boolean }[] = [];
-
-  for (let hour = 0; hour < 24; hour++) {
-    for (let minute = 0; minute < 60; minute += 30) {
-      const label = `${hour.toString().padStart(2, '0')}:${minute
-        .toString()
-        .padStart(2, '0')}`;
-      intervals.push({
-        label,
-        isHour: minute === 0,
-      });
-    }
-  }
-
+  const intervals = getHourIntervals();
   const itemRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
-
-  useEffect(() => {
-    const date = new Date();
-    const el =
-      itemRefs.current[
-      `calendar-row-${intervals.findIndex((v) => v.label == `${date.getHours()}:00`)}`
-      ];
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  });
 
   return (
     <>
@@ -38,6 +15,7 @@ export function TimeSlot() {
           <Fragment key={key}>
             {slot.isHour && (
               <div
+                id={key}
                 is-="separator"
                 className={separator()}
                 ref={(el) => {

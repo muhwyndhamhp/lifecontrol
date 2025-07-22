@@ -6,6 +6,7 @@ import { EventSlot } from './components/EventSlot.tsx';
 import { CreateEventDialog } from './components/CreateEventDialog.tsx';
 import { useAppStore } from '@lib/store.ts';
 import { useEffect, useRef } from 'react';
+import { getHourIntervals } from '@lib/toolbox.ts';
 
 export function CalendarEvents() {
   const keys = useAppStore((state) => state.keys);
@@ -35,13 +36,21 @@ export function CalendarEvents() {
     if (goUp && goDown) return;
     if (!goUp && !goDown) return;
 
-    if (goUp) divRef?.current?.scrollBy({ top: -100 });
-    if (goDown) divRef?.current?.scrollBy({ top: 100 });
+    if (goUp) divRef?.current?.scrollBy({ top: -200, behavior: 'smooth' });
+    if (goDown) divRef?.current?.scrollBy({ top: 200, behavior: 'smooth' });
+  }
+
+  function handleCreate(k: string[]) {
+    const openDialog =
+      k.findIndex((v) => v.toLowerCase() === 'a') !== -1;
+
+    if (openDialog) document.getElementById('dialog')?.togglePopover();
   }
 
   useEffect(() => {
     handleDateKey(keys);
     handleScroll(keys);
+    handleCreate(keys);
   }, [keys]);
 
   const {
@@ -65,6 +74,15 @@ export function CalendarEvents() {
         toggleRefetch();
       }
 
+      const date = new Date();
+      const el = document.getElementById(
+        `calendar-row-${getHourIntervals().findIndex((v) => v.label == `${date.getHours()}:00`)}`
+      );
+
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+
       if (itemId) {
         document
           .getElementById(itemId)
@@ -73,7 +91,7 @@ export function CalendarEvents() {
     };
 
     a();
-  }, [refetch, refetching, toggleRefetch, itemId]);
+  }, [refetch, refetching, toggleRefetch, itemId, start]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>

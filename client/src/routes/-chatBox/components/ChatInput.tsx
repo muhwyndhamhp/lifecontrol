@@ -1,13 +1,36 @@
 import { css } from '@stitches/react';
-import type { KeyboardEvent } from 'react';
+import { useEffect, type KeyboardEvent } from 'react';
 import { useChat } from '../useChat';
+import { useAppStore } from '@lib/store';
 
 type ChatInputProps = {
   onSubmit: (message: string) => void;
 };
 
 export function ChatInput({ onSubmit }: ChatInputProps) {
-  const { clearHistory } = useChat()
+  const { clearHistory } = useChat();
+
+  const keys = useAppStore((state) => state.keys);
+
+  function handleInput(k: string[]) {
+    const hasSlash = k.findIndex((v) => v === '/') !== -1;
+    const hasI = k.findIndex((v) => v === 'i') !== -1;
+
+    if (hasSlash || hasI)
+      (document.getElementById('chat-input') as HTMLInputElement).focus();
+  }
+
+  function handleClearHistory(k: string[]) {
+    const hasClear =
+      k.findIndex((v) => v.toLowerCase() === 'k') !== -1 &&
+      k.findIndex((v) => v === 'Shift') !== -1;
+    if (hasClear) clearHistory();
+  }
+
+  useEffect(() => {
+    handleInput(keys);
+    handleClearHistory(keys);
+  }, [keys]);
 
   const handleKeyUp = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && e.currentTarget.value.trim() !== '') {
@@ -25,13 +48,21 @@ export function ChatInput({ onSubmit }: ChatInputProps) {
           </span>
         </div>
         <input
+          id="chat-input"
           name="name"
           onKeyUp={handleKeyUp}
           className={inputBox()}
           placeholder="When "
         />
       </label>
-      <button style={{ height: '100%' }} onClick={() => { clearHistory() }}>Clear History</button>
+      <button
+        style={{ height: '100%' }}
+        onClick={() => {
+          clearHistory();
+        }}
+      >
+        Clear History
+      </button>
     </div>
   );
 }

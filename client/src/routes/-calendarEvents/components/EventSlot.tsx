@@ -1,6 +1,8 @@
 import { css } from '@stitches/react';
 import { CreateEventDialog } from './CreateEventDialog.tsx';
 import type { CalendarEvent } from '@clientTypes/calendarEvent';
+import { useAppStore } from '@lib/store.ts';
+import { useEffect } from 'react';
 
 export interface eventSlotProps {
   events: CalendarEvent[] | undefined;
@@ -8,10 +10,24 @@ export interface eventSlotProps {
 }
 
 export function EventSlot({ events, refetch }: eventSlotProps) {
+  const keys = useAppStore((state) => state.keys);
+  const idList = events?.map((v) => v.id) ?? [];
+
+  useEffect(() => {
+    const numberKeys = keys.filter(
+      (k) => !isNaN(parseInt(k)) && k.length === 1
+    );
+    if (numberKeys.length !== 1) return;
+
+    document
+      .getElementById(`dialog-${idList[parseInt(numberKeys[0])]}`)
+      ?.togglePopover();
+  }, [keys]);
+
   return (
     <>
       {events &&
-        events.map((event) => {
+        events.map((event, index) => {
           const date = new Date(event.date);
           const hours = date.getHours();
           const minutes = Math.floor(date.getMinutes() / 15) * 15;
@@ -38,7 +54,7 @@ export function EventSlot({ events, refetch }: eventSlotProps) {
                   backgroundColor: `var(--${event.color})`,
                 }}
               >
-                {event.duration >= 30 ? event.name : ''}
+                {event.duration >= 30 ? `[${index}] ${event.name}` : ''}
               </div>
 
               <CreateEventDialog
