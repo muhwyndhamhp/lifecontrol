@@ -23,8 +23,6 @@ export const authMiddleware = createMiddleware<
 
   const issuerUrl = await c.env.ISSUER_URL.get()
 
-  console.log(`*** Issuer URL: ${issuerUrl}`);
-
   const existingSubject = await unwrap(sql.getVerified(accessToken ?? ''));
 
   if (!existingSubject.user) {
@@ -54,6 +52,5 @@ export const authMiddleware = createMiddleware<
     c.set('user', existingSubject.user);
   }
 
-  console.log('*** Exit middleware');
   await next();
 });

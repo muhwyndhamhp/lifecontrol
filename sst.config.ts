@@ -25,10 +25,9 @@ export default $config({
             return;
           }
 
-          if (!!args.observability)
-            args.observability = $resolve(args.observability).apply(
-              (observe) => ({ ...observe, enabled: true })
-            );
+          args.placement = { mode: 'smart' }
+
+          args.observability = { enabled: true };
 
           args.bindings = $resolve(args.bindings).apply((bindings) => [
             ...bindings,
