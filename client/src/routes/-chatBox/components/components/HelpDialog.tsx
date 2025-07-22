@@ -1,7 +1,7 @@
 import { css } from '@stitches/react';
 
 const keybindings = [
-  { key: '?', description: 'Open this help dialog' },
+  { key: 'h', description: 'Open this help dialog' },
   { key: '<', description: 'Go to the previous date' },
   { key: '>', description: 'Go to the next date' },
   { key: 'k', description: 'Scroll up on calendar view' },

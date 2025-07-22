@@ -28,7 +28,7 @@ export function ChatHistory({ chatHistory, loading }: ChatHistoryProps) {
   }
 
   function handleHelp(k: string[]) {
-    const questionMark = k.findIndex((v) => v === '?') !== -1;
+    const questionMark = k.findIndex((v) => v === 'h') !== -1;
     if (questionMark) document.getElementById('help-dialog')?.togglePopover();
   }
 
@@ -61,7 +61,7 @@ export function ChatHistory({ chatHistory, loading }: ChatHistoryProps) {
       ) : (
         <div className={helpIndicator()}>
           <span>
-            Need help? Press <span className={keybind()}>`?`</span> to open help
+            Need help? Press <span className={keybind()}>`h`</span> to open help
             dialog.
           </span>
           <HelpDialog />
