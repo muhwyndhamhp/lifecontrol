@@ -25,7 +25,7 @@ export default defineConfig({
     proxy: {
       '/api': {
         target:
-          'https://lifecontrol-wyndham-lifecontrolscript-mxasxdcb.mwyndham-business.workers.dev',
+          'https://lifecontrol-wyndham-lifecontrolscript-rknzrvbx.mwyndham-business.workers.dev',
         changeOrigin: true,
         secure: true,
         cookieDomainRewrite: 'localhost', // rewrite cookie domain to local

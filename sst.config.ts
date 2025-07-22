@@ -8,11 +8,8 @@ export default $config({
     };
   },
   async run() {
-    const secrets = [new sst.Secret('IssuerUrl'), new sst.Secret('CerebrasSecret')];
-
     const hono = new sst.cloudflare.Worker('LifeControl', {
       url: true,
-      link: [...secrets],
       handler: './server/src/index.ts',
       assets: {
         directory: './dist',
@@ -39,6 +36,21 @@ export default $config({
               name: 'SQL_SERVER',
               type: 'durable_object_namespace',
               className: 'SqlServer',
+            },
+            {
+              name: 'ISSUER_URL',
+              secretName:
+                $app.stage === 'production'
+                  ? 'ISSUER_URL_PRODUCTION'
+                  : 'ISSUER_URL_STAGING',
+              storeId: '115b6e7cab0c47cfb5fb4e07cba3e93e',
+              type: 'secrets_store_secret',
+            },
+            {
+              name: 'CEREBRAS_SECRET',
+              secretName: 'CEREBRAS_SECRET',
+              storeId: '115b6e7cab0c47cfb5fb4e07cba3e93e',
+              type: 'secrets_store_secret',
             },
           ]);
 

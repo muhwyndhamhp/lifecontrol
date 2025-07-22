@@ -3,17 +3,19 @@ import { v4 } from 'uuid';
 import { InferOutput, safeParse } from 'valibot';
 import { internalStructuredSchema, StructuredEventJSONSchema } from './types';
 import { Colors } from '../schemas/calendarEvent';
-import { Resource } from 'sst';
 
-const client = new Cerebras({
-  apiKey: Resource.CerebrasSecret.value,
-});
-
-export async function OperationFromPrompt(userId: number, prompt: string, timeOffset: number) {
+export async function OperationFromPrompt(
+  cerebrasKey: string,
+  userId: number,
+  prompt: string,
+  timeOffset: number
+) {
   const date = new Date();
   date.setHours(date.getUTCHours() - timeOffset);
 
-  const schemaCompletion = await client.chat.completions.create({
+  const schemaCompletion = await new Cerebras({
+    apiKey: cerebrasKey,
+  }).chat.completions.create({
     stream: false,
     model: 'llama-3.3-70b',
     messages: [

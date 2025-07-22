@@ -32,6 +32,7 @@ const prompt = new Hono<
   const sql = getSqlFromContext(c);
 
   const llmRes = await OperationFromPrompt(
+    await c.env.CEREBRAS_SECRET.get(),
     userId,
     data.prompt,
     data.hourOffset

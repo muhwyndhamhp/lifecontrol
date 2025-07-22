@@ -6,14 +6,6 @@
 import "sst"
 declare module "sst" {
   export interface Resource {
-    "CerebrasSecret": {
-      "type": "sst.sst.Secret"
-      "value": string
-    }
-    "IssuerUrl": {
-      "type": "sst.sst.Secret"
-      "value": string
-    }
   }
 }
 // cloudflare 

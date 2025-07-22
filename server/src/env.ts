@@ -28,6 +28,8 @@ import { ContextfulUserFromToken, UserFromToken } from './middlewares/types';
 export interface Env {
   ASSETS: Fetcher;
   SQL_SERVER: DurableObjectNamespace<SqlServer>;
+  ISSUER_URL: SecretsStoreSecret,
+  CEREBRAS_SECRET: SecretsStoreSecret
 }
 
 export class SqlServer extends DurableObject<Env> {
@@ -37,6 +39,10 @@ export class SqlServer extends DurableObject<Env> {
     super(ctx, env);
 
     migrate(this.ctx.storage.sql);
+
+    this.ctx.storage.sql.exec<ValidationCache>(
+      `delete from "validation_cache" where expiry_timestamp <= ${new Date().getTime() / 1000}`
+    );
 
     this.db = new Kysely<Database>({
       dialect: new DODialect({ ctx }),

@@ -12,6 +12,7 @@ export const authMiddleware = createMiddleware<
     };
   }
 >(async (c, next) => {
+  console.log('*** Enter middleware');
   let accessToken = getCookie(c, 'access_token')?.trim();
   let refreshToken = getCookie(c, 'refresh_token')?.trim();
   const sql = getSqlFromContext(c);
@@ -20,10 +21,14 @@ export const authMiddleware = createMiddleware<
     return c.redirect('/authorize');
   }
 
+  const issuerUrl = await c.env.ISSUER_URL.get()
+
+  console.log(`*** Issuer URL: ${issuerUrl}`);
+
   const existingSubject = await unwrap(sql.getVerified(accessToken ?? ''));
 
   if (!existingSubject.user) {
-    const cl = authClient(Resource.IssuerUrl.value);
+    const cl = authClient(issuerUrl);
     const verified = await cl.verify(subjects, accessToken ?? '', {
       refresh: refreshToken ?? '',
     });
@@ -35,12 +40,12 @@ export const authMiddleware = createMiddleware<
     if (verified.tokens?.access && accessToken !== verified.tokens?.access) {
       accessToken = verified.tokens?.access ?? accessToken;
       refreshToken = verified.tokens?.refresh ?? refreshToken;
+
+      setCookie(c, 'access_token', verified.tokens?.access ?? '');
+      setCookie(c, 'refresh_token', verified.tokens?.refresh ?? '');
     }
 
     sql.cacheVerified(accessToken ?? '', refreshToken ?? '', verified.subject);
-
-    setCookie(c, 'access_token', verified.tokens?.access ?? '');
-    setCookie(c, 'refresh_token', verified.tokens?.refresh ?? '');
 
     c.set('user', verified.subject);
   }
@@ -49,5 +54,6 @@ export const authMiddleware = createMiddleware<
     c.set('user', existingSubject.user);
   }
 
+  console.log('*** Exit middleware');
   await next();
 });
