@@ -4,6 +4,7 @@ import type { ChatMessage } from '../useChat.ts';
 import { ChatMessageItem } from './components/ChatMessageItem.tsx';
 import { useAppStore } from '@lib/store.ts';
 import { HelpDialog } from './components/HelpDialog.tsx';
+import { WelcomeMessage } from './components/WelcomeMessage.tsx';
 
 type ChatHistoryProps = {
   chatHistory: ChatMessage[];
@@ -49,20 +50,7 @@ export function ChatHistory({ chatHistory, loading }: ChatHistoryProps) {
           <ChatMessageItem key={idx} chatMessage={v} index={idx} />
         ))
       ) : (
-        <div style={{ display: 'flex', height: '100%' }}>
-          <div style={{ width: '40ch', margin: 'auto', textAlign: 'center' }}>
-            <p>Welcome to Life Control!</p>
-            <p style={{ textAlign: 'justify', margin: '1lh 0ch' }}>
-              To add event you can press "Add Event" below or pressing{' '}
-              <span className={keybind()}>`a`</span> button on your keyboard.
-            </p>
-            <p style={{ textAlign: 'justify', margin: '1lh 0ch' }}>
-              Or you can press either <span className={keybind()}>`i`</span> or{' '}
-              <span className={keybind()}>`/`</span> to focus on the input to
-              start chatting with the calendar assistant.
-            </p>
-          </div>
-        </div>
+        <WelcomeMessage />
       )}
       {loading ? (
         <div className={loadingIndicator()}>
