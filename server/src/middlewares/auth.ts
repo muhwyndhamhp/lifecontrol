@@ -19,7 +19,7 @@ export const authMiddleware = createMiddleware<
     return c.redirect('/authorize');
   }
 
-  const issuerUrl = await c.env.ISSUER_URL.get()
+  const issuerUrl = await c.env.ISSUER_URL.get();
 
   const existingSubject = await unwrap(sql.getVerified(accessToken ?? ''));
 
