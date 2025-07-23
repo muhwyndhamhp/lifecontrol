@@ -14,7 +14,7 @@ export function CreateEventDialog({
   existing,
   idSuffix,
 }: CreateEventDialogProps) {
-  const { deleteEvent, dateString, submit, formRef, dialogRef } =
+  const { deleteEvent, dateString, submit, formRef, dialogRef, loading } =
     useEventDialog(existing);
 
   return (
@@ -105,11 +105,12 @@ export function CreateEventDialog({
           </label>{' '}
           <button
             variant-="mauve"
-            onClick={(e) => {
-              submit(e);
+            onClick={async (e) => {
+              await submit(e);
               onSubmit();
             }}
             type="submit"
+            disabled={loading}
             style={{ width: 'calc(100% - 1ch)', margin: '0lh auto' }}
           >
             {existing ? 'Update' : 'Create'}
@@ -119,15 +120,20 @@ export function CreateEventDialog({
               variant-="red"
               box-="round"
               type="submit"
-              onClick={(e) => {
-                deleteEvent(e);
+              onClick={async (e) => {
+                await deleteEvent(e);
                 onSubmit();
               }}
+              disabled={loading}
             >
               Delete
             </button>
           )}
         </div>
+        <span style={{ visibility: loading ? 'visible' : 'hidden' }}>
+          <span is-="spinner" variant-="bar-horizontal"></span>
+          Loading...
+        </span>
       </form>
     </dialog>
   );

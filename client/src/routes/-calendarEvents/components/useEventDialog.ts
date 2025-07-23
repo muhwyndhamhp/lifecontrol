@@ -5,10 +5,12 @@ import {
   updateCalendarEventSchema,
 } from '@server/schemas/calendarEvent';
 import type { ClientResponse } from 'hono/client';
-import { useRef, useCallback, type FormEvent } from 'react';
+import { useRef, useCallback, type FormEvent, useState } from 'react';
 import { safeParse } from 'valibot';
 
 export function useEventDialog(existing?: CalendarEvent) {
+  const [loading, setLoading] = useState(false);
+
   const formRef = useRef<HTMLFormElement>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
 
@@ -19,6 +21,7 @@ export function useEventDialog(existing?: CalendarEvent) {
       if (!form) {
         return;
       }
+      setLoading(true);
 
       const formData = new FormData(form);
       const values = Object.fromEntries(formData.entries());
@@ -61,6 +64,8 @@ export function useEventDialog(existing?: CalendarEvent) {
         console.log('Create event not successful');
       }
 
+      setLoading(false);
+
       dialogRef.current?.togglePopover();
     },
     [existing]
@@ -69,6 +74,7 @@ export function useEventDialog(existing?: CalendarEvent) {
   const deleteEvent = useCallback(
     async (e: FormEvent) => {
       e.preventDefault();
+      setLoading(true);
 
       const blob = await client.api.events[':id'].$delete({
         param: {
@@ -82,6 +88,7 @@ export function useEventDialog(existing?: CalendarEvent) {
         console.log('Delete event not successful');
       }
 
+      setLoading(false);
       dialogRef.current?.togglePopover();
     },
     [existing?.id]
@@ -91,7 +98,7 @@ export function useEventDialog(existing?: CalendarEvent) {
     existing ? new Date(existing?.date) : new Date()
   );
 
-  return { deleteEvent, dateString, submit, formRef, dialogRef };
+  return { deleteEvent, dateString, submit, formRef, dialogRef, loading };
 }
 
 function formatDateTimeLocal(date: Date): string {
