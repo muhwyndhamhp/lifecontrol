@@ -14,7 +14,13 @@ import {
 import { Colors } from '../schemas/calendarEvent';
 import { toJsonSchema } from '@valibot/to-json-schema';
 
-export const Operations = ['Create', 'Update', 'Query', 'None'] as const;
+export const Operations = [
+  'Create',
+  'Update',
+  'Query',
+  'None',
+  'BulkCreate',
+] as const;
 
 const whereStatementsSchema = {
   whereStatements: pipe(
@@ -67,6 +73,11 @@ export const createSchema = object({
   ...createSchemaBase,
 });
 
+export const bulkCreate = object({
+  __typename: picklist(Operations, 'BulkCreate'),
+  operations: array(createSchema),
+});
+
 export const updateSchema = object({
   __typename: picklist(Operations, 'Update'),
   ...updateSchemaBase,
@@ -82,7 +93,13 @@ export const noneSchema = object({
 });
 
 export const structuredEventSchema = object({
-  operation: union([queryEventSchema, createSchema, updateSchema, noneSchema]),
+  operation: union([
+    queryEventSchema,
+    createSchema,
+    updateSchema,
+    noneSchema,
+    bulkCreate,
+  ]),
   response: string(),
 });
 
@@ -93,9 +110,15 @@ const StructuredEventJSON = toJsonSchema(structuredEventSchema, {
 export const { $schema, ...StructuredEventJSONSchema } = StructuredEventJSON;
 
 // Internal-facing Schemas (for application logic)
+
 export const internalCreateSchema = object({
   __typename: literal('Create'),
   ...createSchemaBase,
+});
+
+export const internalBulkCreateSchema = object({
+  __typename: literal('BulkCreate'),
+  operations: array(internalCreateSchema),
 });
 
 export const internalUpdateSchema = object({
@@ -118,6 +141,7 @@ export const internalStructuredSchema = object({
     internalCreateSchema,
     internalUpdateSchema,
     internalNone,
+    internalBulkCreateSchema,
   ]),
   response: string(),
 });
@@ -134,7 +158,9 @@ export const promptEventResponse = object({
   user_id: optional(number()),
 });
 
-const createPromptResponseSchema = <T extends 'Create' | 'Update' | 'Query'>(
+const createPromptResponseSchema = <
+  T extends 'Create' | 'Update' | 'Query' | 'BulkCreate',
+>(
   type: T
 ) =>
   object({
@@ -145,6 +171,8 @@ const createPromptResponseSchema = <T extends 'Create' | 'Update' | 'Query'>(
 export const promptResponseCreate = createPromptResponseSchema('Create');
 export const promptResponseQuery = createPromptResponseSchema('Query');
 export const promptResponseUpdate = createPromptResponseSchema('Update');
+export const promptResponseBulkCreate =
+  createPromptResponseSchema('BulkCreate');
 
 export const promptStructuredResponseSchema = object({
   promptResponse: string(),
@@ -153,5 +181,6 @@ export const promptStructuredResponseSchema = object({
     promptResponseUpdate,
     promptResponseQuery,
     object({ __typename: literal('None') }),
+    promptResponseBulkCreate,
   ]),
 });

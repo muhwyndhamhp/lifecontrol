@@ -3,6 +3,7 @@ import { vValidator } from '@hono/valibot-validator';
 import { InferOutput, number, object, string } from 'valibot';
 import { OperationFromPrompt } from '../llm/client';
 import {
+  promptResponseBulkCreate,
   promptResponseCreate,
   promptResponseQuery,
   promptResponseUpdate,
@@ -49,6 +50,8 @@ const prompt = new Hono<
   const res = llmRes.response.operation;
   let result: InferOutput<typeof promptStructuredResponseSchema>['result'];
 
+  console.log(`***res ${res}`)
+
   switch (res.__typename) {
     case 'Query': {
       const r = await unwrap(sql.queryByPrompts(userId, res));
@@ -80,6 +83,18 @@ const prompt = new Hono<
           ...v,
         })),
       } as InferOutput<typeof promptResponseUpdate>;
+      break;
+    }
+    case 'BulkCreate': {
+      const r = await unwrap(
+        sql.bulkCreateByPrompts(userId, res, data.hourOffset)
+      );
+      result = {
+        __typename: 'BulkCreate',
+        events: r.event.map((v) => ({
+          ...v,
+        })),
+      } as InferOutput<typeof promptResponseBulkCreate>;
       break;
     }
     case 'None': {

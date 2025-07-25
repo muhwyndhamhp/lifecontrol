@@ -12,6 +12,7 @@ import {
 } from '../schemas/calendarEvent';
 import { v4 } from 'uuid';
 import {
+  internalBulkCreateSchema,
   internalCreateSchema,
   internalQuerySchema,
   internalUpdateSchema,
@@ -64,7 +65,7 @@ export async function updateByPrompts(
 
   update.set.forEach((v) => {
     if (ref(v.column).dynamicReference === 'user_id') {
-      return
+      return;
     }
 
     if (ref(v.column).dynamicReference === 'date') {
@@ -80,12 +81,36 @@ export async function updateByPrompts(
   });
 
   q = applyWhereFromPrompts(db, q, update.whereStatements);
-  q = q.where('calendar_events.user_id', '=', userId)
+  q = q.where('calendar_events.user_id', '=', userId);
 
   const result = await q.returningAll().execute();
 
   return {
     success: !!result,
+    event: result,
+  };
+}
+
+export async function bulkCreateByPrompts(
+  db: Kysely<Database>,
+  userId: number,
+  create: InferOutput<typeof internalBulkCreateSchema>,
+  offsetHour: number
+) {
+  const promises = create.operations.map(
+    async (v) => await createByPrompts(db, userId, v, offsetHour)
+  );
+
+  const wrapperResult = await Promise.all(promises);
+  let success = true;
+
+  const result = wrapperResult.map((v) => {
+    success = v.success;
+    return v.event;
+  });
+
+  return {
+    success: success,
     event: result,
   };
 }
@@ -136,7 +161,7 @@ export async function queryByPrompts(
   );
 
   q = q.where('calendar_events.deleted_at', 'is', null);
-  q = q.where('calendar_events.user_id', '=', userId)
+  q = q.where('calendar_events.user_id', '=', userId);
   q = q.limit(query.paginate.limit).offset(query.paginate.offset);
 
   return await q.execute();

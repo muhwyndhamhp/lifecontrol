@@ -3,6 +3,7 @@ import { Kysely, LogEvent } from 'kysely';
 import { DODialect } from 'kysely-do';
 import { migrate } from './migration';
 import {
+  bulkCreateByPrompts,
   createByPrompts,
   createEvents,
   deleteEvent,
@@ -19,6 +20,7 @@ import {
 } from './schemas/calendarEvent';
 import { Context } from 'hono';
 import {
+  internalBulkCreateSchema,
   internalCreateSchema,
   internalQuerySchema,
   internalUpdateSchema,
@@ -101,6 +103,14 @@ export class SqlServer extends DurableObject<Env> {
     query: InferOutput<typeof internalQuerySchema>
   ) {
     return await queryByPrompts(this.db, userId, query);
+  }
+
+  async bulkCreateByPrompts(
+    userId: number,
+    query: InferOutput<typeof internalBulkCreateSchema>,
+    offsetHour: number
+  ) {
+    return await bulkCreateByPrompts(this.db, userId, query, offsetHour);
   }
 
   async createByPrompts(

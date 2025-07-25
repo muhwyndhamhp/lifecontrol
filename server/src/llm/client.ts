@@ -45,8 +45,9 @@ export async function OperationFromPrompt(
         Create, Update, Query, and None.
 
         - If user says something on the similar vein of "please add new schedule to my calendar" or "please add ...", 
-          then you should return structured output with the __typename of 'Create'.
-          You then should populate the fields based on following criteria:
+          then you should return structured output with the __typename of 'Create' if it's singular, 
+          or 'BulkCreate' if it's plural. If it's plural, then each insert should be part of "operations" property.
+          You then should populate the fields on insert based on following criteria:
             + id: populate with "${v4()}"
             + name: infer the name that should represent the agenda of the scheduled event
             + date: infer from what's user expecting, should be populated with ISO Format. 

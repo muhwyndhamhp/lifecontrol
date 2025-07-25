@@ -93,7 +93,7 @@ export function useChat() {
 
         break;
       }
-
+      case 'BulkCreate':
       case 'Create':
       case 'Update': {
         setChatHistory((prev) => [
