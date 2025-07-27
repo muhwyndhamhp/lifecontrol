@@ -15,7 +15,7 @@ export async function getCalendarList(
 
   const response = await calendarFetch(
     token,
-    `/users/me/calendarList?${params.toString()}`
+    `users/me/calendarList?${params.toString()}`
   );
 
   if (!(response instanceof Response)) {
@@ -44,6 +44,7 @@ export async function getCalendarList(
       Not Success to Parse, 
       issues: ${JSON.stringify(data.issues, null, 2)}
       `);
+
     return data.issues.map((v) => new Error(v.message));
   }
 
