@@ -27,4 +27,4 @@ const app = new Hono<{ Bindings: Env }>()
 export default app;
 
 export type AppType = typeof app;
-export { SqlServer } from './env';
+export { SqlServer } from './queries/durableObject';

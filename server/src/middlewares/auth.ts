@@ -2,7 +2,8 @@ import { createMiddleware } from 'hono/factory';
 import { getCookie, setCookie } from 'hono/cookie';
 import { authClient, subjects } from '../../../auth/client';
 import { UserFromToken } from './types';
-import { Env, getSqlFromContext, unwrap } from '../env';
+import { Env } from '../env';
+import { getSqlFromContext, unwrap } from '../queries/durableObject';
 
 export const authMiddleware = createMiddleware<
   { Bindings: Env } & {

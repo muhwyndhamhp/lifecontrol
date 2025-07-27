@@ -114,4 +114,16 @@ const migrations = [
     )
     `,
   },
+  {
+    name: `010_add_user_calendar_ref`,
+    sql: `
+    create table if not exists "user_calendar_refs" (
+      id integer primary key autoincrement,
+      user_id integer not null,
+      calendar_id string not null,
+      calendar_summary string not null,
+      last_sync datetime not null
+    )
+    `
+  }
 ];

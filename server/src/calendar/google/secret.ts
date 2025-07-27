@@ -30,7 +30,7 @@ async function getMasterKey(secret: string): Promise<CryptoKey> {
   return crypto.subtle.importKey(
     'raw',
     derivedKey,
-    { name: 'AES-GCM', length: 256 },
+    { name: ALGORITHM, length: 256 },
     false,
     ['encrypt', 'decrypt']
   );

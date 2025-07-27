@@ -5,11 +5,9 @@ import {
   getCalendarEvents,
   updateCalendarEventSchema,
 } from '../schemas/calendarEvent';
-import { getSqlFromContext, unwrap } from '../env';
 import { Env } from '../env';
 import { UserFromToken } from '../middlewares/types';
-import { syncCalendarEvents } from '../calendar/google/sync';
-import { getSecret } from '../calendar/google/secret';
+import { getSqlFromContext, unwrap } from '@queries/durableObject';
 
 const events = new Hono<
   { Bindings: Env } & {
@@ -24,16 +22,13 @@ const events = new Hono<
 
     const userId = parseInt(user.properties.userID);
 
-    const secret = await getSecret(c.env, userId.toString(), 'google');
-
-    if (secret) {
-      const calendarEvent = syncCalendarEvents(secret, "Default");
-      console.log(`*** Calendar Result: ${JSON.stringify(calendarEvent, null, 2)}`)
-    }
-
     const data = c.req.valid('query');
     const res = await unwrap(
-      sql.getCalendarEvents(userId, data.startDate, data.endDate)
+      sql.getCalendarEvents({
+        userId,
+        dateStart: data.startDate,
+        dateEnd: data.endDate,
+      })
     );
 
     return c.json(res);
@@ -45,7 +40,7 @@ const events = new Hono<
     const data = c.req.valid('json');
     data.userId = parseInt(user.properties.userID);
 
-    const res = await unwrap(sql.createCalendarEvents(data));
+    const res = await unwrap(sql.createCalendarEvents({ input: data }));
 
     return c.json(res);
   })
@@ -56,7 +51,7 @@ const events = new Hono<
     const data = c.req.valid('json');
     data.userId = parseInt(user.properties.userID);
 
-    const res = await unwrap(sql.updateCalendarEvents(data));
+    const res = await unwrap(sql.updateCalendarEvents({ input: data }));
 
     return c.json(res);
   })
@@ -66,7 +61,10 @@ const events = new Hono<
     const user = c.get('user');
 
     const res = await unwrap(
-      sql.deleteCalendarEvent(parseInt(user.properties.userID ?? ''), id)
+      sql.deleteCalendarEvent({
+        userId: parseInt(user.properties.userID ?? ''),
+        id,
+      })
     );
 
     return c.json(res);

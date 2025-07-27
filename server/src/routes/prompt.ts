@@ -9,9 +9,9 @@ import {
   promptResponseUpdate,
   promptStructuredResponseSchema,
 } from '../llm/types';
-import { getSqlFromContext, unwrap } from '../env';
 import { Env } from '../env';
 import { UserFromToken } from '../middlewares/types';
+import { getSqlFromContext, unwrap } from '@queries/durableObject';
 
 const promptSchema = object({ prompt: string(), hourOffset: number() });
 
@@ -50,11 +50,9 @@ const prompt = new Hono<
   const res = llmRes.response.operation;
   let result: InferOutput<typeof promptStructuredResponseSchema>['result'];
 
-  console.log(`***res ${res}`)
-
   switch (res.__typename) {
     case 'Query': {
-      const r = await unwrap(sql.queryByPrompts(userId, res));
+      const r = await unwrap(sql.queryByPrompts({ userId, query: res }));
       result = {
         __typename: 'Query',
         events: r.map((v) => ({
@@ -64,7 +62,13 @@ const prompt = new Hono<
       break;
     }
     case 'Create': {
-      const r = await unwrap(sql.createByPrompts(userId, res, data.hourOffset));
+      const r = await unwrap(
+        sql.createByPrompts({
+          userId,
+          create: res,
+          offsetHour: data.hourOffset,
+        })
+      );
       result = {
         __typename: 'Create',
         events: [
@@ -76,7 +80,13 @@ const prompt = new Hono<
       break;
     }
     case 'Update': {
-      const r = await unwrap(sql.updateByPrompts(userId, res, data.hourOffset));
+      const r = await unwrap(
+        sql.updateByPrompts({
+          userId,
+          update: res,
+          offsetHour: data.hourOffset,
+        })
+      );
       result = {
         __typename: 'Update',
         events: r.event.map((v) => ({
@@ -87,7 +97,11 @@ const prompt = new Hono<
     }
     case 'BulkCreate': {
       const r = await unwrap(
-        sql.bulkCreateByPrompts(userId, res, data.hourOffset)
+        sql.bulkCreateByPrompts({
+          userId,
+          create: res,
+          offsetHour: data.hourOffset,
+        })
       );
       result = {
         __typename: 'BulkCreate',

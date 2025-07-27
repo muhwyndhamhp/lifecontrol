@@ -10,6 +10,9 @@
     "types": [
       "@cloudflare/workers-types"
     ],
+    "paths": {
+      "@queries/*": ["./server/src/queries/*"]
+    }
   }
 }
 

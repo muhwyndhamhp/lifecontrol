@@ -26,7 +26,11 @@ const calendars = new Hono<
 
   const calendars = await getCalendarList(secret);
   if (Array.isArray(calendars)) {
-    return c.json({ success: false, errors: calendars, calendars: undefined as GoogleCalendars | undefined });
+    return c.json({
+      success: false,
+      errors: calendars,
+      calendars: undefined as GoogleCalendars | undefined,
+    });
   }
 
   return c.json({ success: true, calendars: calendars, errors: [] });

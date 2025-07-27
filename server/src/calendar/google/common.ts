@@ -25,7 +25,7 @@ export async function calendarFetch(
   token: Oauth2Token,
   pathAndQuery: string
 ): Promise<Response | Error[]> {
-  const url = `${GOOGLE_CALENDAR_API_URL}${pathAndQuery}`;
+  const url = `${GOOGLE_CALENDAR_API_URL}/${pathAndQuery}`;
 
   const response = await fetch(url, {
     headers: {
@@ -33,13 +33,12 @@ export async function calendarFetch(
     },
   });
 
-  if (response.status === 410) {
+  if (response.status === 410)
     return [
       new SyncTokenExpiredError(
         'Sync token is invalid. A full sync is required.'
       ),
     ];
-  }
 
   return response;
 }
