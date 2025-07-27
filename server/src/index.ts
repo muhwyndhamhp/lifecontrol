@@ -5,10 +5,12 @@ import { handleAssets } from './assets';
 import events from './routes/events';
 import prompt from './routes/prompt';
 import { authMiddleware } from './middlewares/auth';
+import calendars from './routes/calendar';
 
 const apiApp = new Hono<{ Bindings: Env }>()
   .route('/events', events)
-  .route('/prompt', prompt);
+  .route('/prompt', prompt)
+  .route('/calendars', calendars);
 
 const app = new Hono<{ Bindings: Env }>()
   .use(

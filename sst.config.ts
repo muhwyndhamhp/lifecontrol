@@ -26,9 +26,7 @@ export default $config({
           }
 
           args.placement = { mode: 'smart' }
-
           args.observability = { enabled: true };
-
           args.bindings = $resolve(args.bindings).apply((bindings) => [
             ...bindings,
             {
@@ -51,6 +49,19 @@ export default $config({
               storeId: '115b6e7cab0c47cfb5fb4e07cba3e93e',
               type: 'secrets_store_secret',
             },
+            {
+              name: 'AUTH_DB_CREDS',
+              secretName: 'AUTH_DB_CREDS',
+              storeId: '115b6e7cab0c47cfb5fb4e07cba3e93e',
+              type: 'secrets_store_secret',
+            },
+            {
+              name: 'MASTER_SECRET_KEY',
+              secretName: 'MASTER_SECRET_KEY',
+              storeId: '115b6e7cab0c47cfb5fb4e07cba3e93e',
+              type: 'secrets_store_secret',
+            },
+
           ]);
 
           // args.migrations = {

@@ -8,6 +8,8 @@ import {
 import { getSqlFromContext, unwrap } from '../env';
 import { Env } from '../env';
 import { UserFromToken } from '../middlewares/types';
+import { syncCalendarEvents } from '../calendar/google/sync';
+import { getSecret } from '../calendar/google/secret';
 
 const events = new Hono<
   { Bindings: Env } & {
@@ -21,6 +23,13 @@ const events = new Hono<
     const user = c.get('user');
 
     const userId = parseInt(user.properties.userID);
+
+    const secret = await getSecret(c.env, userId.toString(), 'google');
+
+    if (secret) {
+      const calendarEvent = syncCalendarEvents(secret, "Default");
+      console.log(`*** Calendar Result: ${JSON.stringify(calendarEvent, null, 2)}`)
+    }
 
     const data = c.req.valid('query');
     const res = await unwrap(

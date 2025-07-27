@@ -32,6 +32,8 @@ export interface Env {
   SQL_SERVER: DurableObjectNamespace<SqlServer>;
   ISSUER_URL: SecretsStoreSecret;
   CEREBRAS_SECRET: SecretsStoreSecret;
+  AUTH_DB_CREDS: SecretsStoreSecret;
+  MASTER_SECRET_KEY: SecretsStoreSecret;
 }
 
 export class SqlServer extends DurableObject<Env> {

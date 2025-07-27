@@ -6,6 +6,7 @@ import type { Challenge } from '@openauthjs/openauth/client';
 import type { InvalidAuthorizationCodeError } from '@openauthjs/openauth/error';
 import { setTokens } from '@lib/cookies';
 import { css } from '@stitches/react';
+import { client, rpcFetch } from '@lib/fetcher';
 
 const CallbackSchema = object({
   code: string(),
@@ -62,7 +63,8 @@ function RouteComponent() {
       }
 
       await setTokens(exchanged.tokens.access, exchanged.tokens.refresh);
-      window.location.href = '/';
+
+      window.location.href = '/onboarding';
     };
 
     redirect().then((r) => console.log(r));

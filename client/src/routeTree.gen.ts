@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WelcomeRouteImport } from './routes/welcome'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as CallbackRouteImport } from './routes/callback'
 import { Route as AuthorizeRouteImport } from './routes/authorize'
 import { Route as IndexRouteImport } from './routes/index'
@@ -17,6 +18,11 @@ import { Route as IndexRouteImport } from './routes/index'
 const WelcomeRoute = WelcomeRouteImport.update({
   id: '/welcome',
   path: '/welcome',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CallbackRoute = CallbackRouteImport.update({
@@ -39,12 +45,14 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/authorize': typeof AuthorizeRoute
   '/callback': typeof CallbackRoute
+  '/onboarding': typeof OnboardingRoute
   '/welcome': typeof WelcomeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/authorize': typeof AuthorizeRoute
   '/callback': typeof CallbackRoute
+  '/onboarding': typeof OnboardingRoute
   '/welcome': typeof WelcomeRoute
 }
 export interface FileRoutesById {
@@ -52,20 +60,22 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/authorize': typeof AuthorizeRoute
   '/callback': typeof CallbackRoute
+  '/onboarding': typeof OnboardingRoute
   '/welcome': typeof WelcomeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/authorize' | '/callback' | '/welcome'
+  fullPaths: '/' | '/authorize' | '/callback' | '/onboarding' | '/welcome'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/authorize' | '/callback' | '/welcome'
-  id: '__root__' | '/' | '/authorize' | '/callback' | '/welcome'
+  to: '/' | '/authorize' | '/callback' | '/onboarding' | '/welcome'
+  id: '__root__' | '/' | '/authorize' | '/callback' | '/onboarding' | '/welcome'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthorizeRoute: typeof AuthorizeRoute
   CallbackRoute: typeof CallbackRoute
+  OnboardingRoute: typeof OnboardingRoute
   WelcomeRoute: typeof WelcomeRoute
 }
 
@@ -76,6 +86,13 @@ declare module '@tanstack/react-router' {
       path: '/welcome'
       fullPath: '/welcome'
       preLoaderRoute: typeof WelcomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/callback': {
@@ -106,6 +123,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthorizeRoute: AuthorizeRoute,
   CallbackRoute: CallbackRoute,
+  OnboardingRoute: OnboardingRoute,
   WelcomeRoute: WelcomeRoute,
 }
 export const routeTree = rootRouteImport
