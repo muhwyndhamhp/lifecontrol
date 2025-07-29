@@ -25,8 +25,6 @@ export function CalendarEvents() {
 
     if (toPrevious && toNext) return;
     if (!toPrevious && !toNext) return;
-
-    toPrevious ? previousDay() : nextDay();
   }
 
   function handleScroll(k: string[]) {
