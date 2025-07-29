@@ -3,6 +3,7 @@ import { SqlServer } from '@queries/durableObject';
 export interface Env {
   ASSETS: Fetcher;
   SQL_SERVER: DurableObjectNamespace<SqlServer>;
+  WORKFLOW_SERVER: Workflow;
   ISSUER_URL: SecretsStoreSecret;
   CEREBRAS_SECRET: SecretsStoreSecret;
   AUTH_DB_CREDS: SecretsStoreSecret;

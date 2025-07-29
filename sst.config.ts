@@ -61,7 +61,12 @@ export default $config({
               storeId: '115b6e7cab0c47cfb5fb4e07cba3e93e',
               type: 'secrets_store_secret',
             },
-
+            {
+              name: 'WORKFLOW_SERVER',
+              workflowName: 'WORKFLOW_SERVER',
+              type: 'workflow',
+              className: 'WorkflowServer'
+            }
           ]);
 
           // args.migrations = {
